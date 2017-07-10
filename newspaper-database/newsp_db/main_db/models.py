@@ -89,7 +89,6 @@ class State(models.Model):
             ('WV','West Virginia'),
             ('WY','Wyoming'),
         )
-        state_id = models.AutoField(primary_key=True)
         state = models.CharField(max_length=2, choices=STATES, unique=True)
 
         def __str__(self):
