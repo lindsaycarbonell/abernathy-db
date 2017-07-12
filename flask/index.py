@@ -62,7 +62,13 @@ def form():
             ep_papers[idx]['newspaper_name'] = newspaper['pub_companyName']
             ep_papers[idx]['city'] = newspaper['Streetaddresscity']
             ep_papers[idx]['county'] = newspaper['County']
-        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state)
+
+        ## get counts
+        db_total = len(state_papers)
+        ep_total = len(ep_papers)
+        # print('db_total: %s \n ep_total: %s' % (db_total, ep_total))
+
+        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total)
     else:
         return render_template('index.html', cssurl = css_url, states = states, state=None)
 
