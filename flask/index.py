@@ -58,7 +58,7 @@ def form():
             state_papers[idx]['county'] = newspaper['county']
         ## ...and get it from EP too
         ep_papers = defaultdict(dict)
-        for idx, newspaper in enumerate(query_db('SELECT * FROM ep_2017 WHERE Streetaddressstate = ?', [ex_state])):
+        for idx, newspaper in enumerate(query_db('SELECT * FROM ep_2017 WHERE Streetaddressstate = ?', [this_state])):
             ep_papers[idx]['newspaper_name'] = newspaper['pub_companyName']
             ep_papers[idx]['city'] = newspaper['Streetaddresscity']
             ep_papers[idx]['county'] = newspaper['County']
