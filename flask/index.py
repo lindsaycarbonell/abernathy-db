@@ -1,5 +1,5 @@
 # http://flask.pocoo.org/docs/0.12/quickstart/
-from flask import Flask, url_for, request, g
+from flask import Flask, url_for, request, g, redirect
 from flask import render_template
 app = Flask(__name__)
 
@@ -30,6 +30,14 @@ with app.app_context():
         cur.close()
         return (rv[0] if rv else None) if one else rv
 
+    states = query_db('SELECT state FROM newspaper GROUP BY state')
+
+
+    for state in states:
+        print state
+
+
+    # get a table
     this_state = 'DC'
     DC_papers = defaultdict(dict)
 
@@ -40,11 +48,57 @@ with app.app_context():
         DC_papers[idx]['city'] = newspaper['city']
         DC_papers[idx]['county'] = newspaper['county']
 
-    for k,v in DC_papers.items():
-        print(v)
 
-@app.route('/')
-@app.route('/index/<name>')
-def index(name=None):
+    # print DC_papers
+    #
+    # for k,v in DC_papers.items():
+    #     print(k)
+    #     for key, value in v.items():
+    #         print k[0][value]
+
+@app.route('/', methods=['GET', 'POST'])
+def form():
     css_url = url_for('static', filename='style.css')
-    return render_template('index.html', name=name, cssurl = css_url, dcpapers = DC_papers)
+    if request.method == 'POST':
+        state=request.form['state']
+        return render_template('index.html', cssurl = css_url, states = states, dcpapers = DC_papers, state=state)
+    else:
+        return render_template('index.html', cssurl = css_url, states = states, dcpapers = DC_papers, state=None)
+
+
+@app.route('/select/', methods=['POST', 'GET'])
+def get_state():
+    if request.method == 'POST':
+        state=request.form['state']
+        css_url = url_for('static', filename='style.css')
+        return redirect(url_for('/', state=state))
+    else:
+        return render_template('selectstate.html', states=states)
+
+
+# @app.route('/', methods=['GET', 'POST'])
+# def show_index():
+#     if request.method == 'POST':
+#         return redirect(url_for('state', state=request.form['state']))
+#     else:
+#         css_url = url_for('static', filename='style.css')
+#         return render_template('index.html', cssurl = css_url, states = states, dcpapers = DC_papers)
+#
+# @app.route('/select_state')
+# def form():
+#     return render_template('selectstate.html', states=states)
+#
+# @app.route('/state/<state>', methods=['GET', 'POST'])
+# def state_select(state=None):
+#     if request.method == 'POST':
+#         return redirect(url_for('state',state=state))
+#     else:
+#         return render_template('index.html', cssurl = css_url, states = states, dcpapers = DC_papers, state=state)
+
+# @app.route('/state_select', methods=['GET','POST'])
+# def state_select():
+#     select = request.form.get('state_select')
+#     return(str(select))
+
+if __name__=='__main__':
+    app.run(debug=True)

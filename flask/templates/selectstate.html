@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title> Merging with Editor and Publisher</title>
+    <title>Select a State</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -13,46 +13,14 @@
 
   </head>
   <body>
-  {% if state %}
-    <h1>{{state}}</h1>
-    <!-- <form method="POST" action="/state/">
+    <h1>{{selected_state}}</h1>
+    <form method="POST" action="/">
       <select name="state" class="form-control" onchange="this.form.submit()">
         {% for state in states %}
           <option value="{{ state[0] }}">{{ state[0] }}</option>
         {% endfor %}
       </select>
-    </form> -->
-    <a href="/select/">Select another state</a>
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>newspaper_id</th>
-          <th>newspaper_name</th>
-          <th>city</th>
-          <th>county</th>
-        </tr>
-      </thead>
-      {% for k,v in dcpapers.items()|reverse: %}
-        <tr>
-        {% for key, value in v.items()|reverse: %}
-          {% if key == 'newspaper_id' %}
-            <th scope="row">{{ value }}</th>
-          {% elif key == 'newspaper_name' %}
-            <th>{{ value }}</th>
-          {% elif key == 'city' %}
-            <th>{{ value }}</th>
-          {% elif key == 'county' %}
-            <th>{{ value }}</th>
-          {% else %}
-            <th>unknown key: {{ value }}</th>
-          {% endif %}
-      {% endfor %}
-      {% endfor %}
-      </tr>
-    </table>
-  {% else %}
-    <a href="/select">Select a state</a>
-  {% endif %}
+    </form>
     <!-- jQuery first, then Tether, then Bootstrap JS. -->
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
