@@ -32,7 +32,7 @@
           <th>county</th>
         </tr>
       </thead>
-      {% for k,v in dcpapers.items()|reverse: %}
+      {% for k,v in state_papers.items()|reverse: %}
         <tr>
         {% for key, value in v.items()|reverse: %}
           {% if key == 'newspaper_id' %}

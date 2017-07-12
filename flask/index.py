@@ -61,7 +61,15 @@ def form():
     css_url = url_for('static', filename='style.css')
     if request.method == 'POST':
         state=request.form['state']
-        return render_template('index.html', cssurl = css_url, states = states, dcpapers = DC_papers, state=state)
+        ## get state data needed to populate table
+        this_state=request.form['state']
+        state_papers = defaultdict(dict)
+        for idx, newspaper in enumerate(query_db('select * from newspaper where state = ?', [this_state])):
+            state_papers[idx]['newspaper_id'] = newspaper['newspaper_id']
+            state_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
+            state_papers[idx]['city'] = newspaper['city']
+            state_papers[idx]['county'] = newspaper['county']
+        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, state=state)
     else:
         return render_template('index.html', cssurl = css_url, states = states, dcpapers = DC_papers, state=None)
 
