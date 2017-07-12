@@ -50,6 +50,31 @@
       {% endfor %}
       </tr>
     </table>
+
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>newspaper_name</th>
+          <th>city</th>
+          <th>county</th>
+        </tr>
+      </thead>
+      {% for k,v in ep_papers.items()|reverse: %}
+        <tr>
+        {% for key, value in v.items()|reverse: %}
+          {% if key == 'newspaper_name' %}
+            <th scope="row">{{ value }}</th>
+          {% elif key == 'city' %}
+            <th>{{ value }}</th>
+          {% elif key == 'county' %}
+            <th>{{ value }}</th>
+          {% else %}
+            <th>unknown key: {{ value }}</th>
+          {% endif %}
+      {% endfor %}
+      {% endfor %}
+      </tr>
+    </table>
   {% else %}
     <a href="/select">Select a state</a>
   {% endif %}

@@ -32,36 +32,23 @@ with app.app_context():
 
     states = query_db('SELECT state FROM newspaper GROUP BY state')
 
+    ## Grab a state from EP in a tuple
+    ep_papers = defaultdict(dict)
+    ex_state = 'CT'
+    address = 'Streetaddressstate'
+    con = sqlite3.connect('abernathy.db')
+    cur = con.cursor()
+    cur.execute('SELECT * FROM ep_2017 WHERE Streetaddressstate = ?', [ex_state])
+    # print cur.fetchall()
+    con.close()
 
-    for state in states:
-        print state
-
-
-    # get a table
-    this_state = 'DC'
-    DC_papers = defaultdict(dict)
-
-    for idx, newspaper in enumerate(query_db('select * from newspaper where state = ?', [this_state])):
-
-        DC_papers[idx]['newspaper_id'] = newspaper['newspaper_id']
-        DC_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
-        DC_papers[idx]['city'] = newspaper['city']
-        DC_papers[idx]['county'] = newspaper['county']
-
-
-    # print DC_papers
-    #
-    # for k,v in DC_papers.items():
-    #     print(k)
-    #     for key, value in v.items():
-    #         print k[0][value]
 
 @app.route('/', methods=['GET', 'POST'])
 def form():
     css_url = url_for('static', filename='style.css')
     if request.method == 'POST':
         state=request.form['state']
-        ## get state data needed to populate table
+        ## get DB state data needed to populate table
         this_state=request.form['state']
         state_papers = defaultdict(dict)
         for idx, newspaper in enumerate(query_db('select * from newspaper where state = ?', [this_state])):
@@ -69,9 +56,15 @@ def form():
             state_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
             state_papers[idx]['city'] = newspaper['city']
             state_papers[idx]['county'] = newspaper['county']
-        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, state=state)
+        ## ...and get it from EP too
+        ep_papers = defaultdict(dict)
+        for idx, newspaper in enumerate(query_db('SELECT * FROM ep_2017 WHERE Streetaddressstate = ?', [ex_state])):
+            ep_papers[idx]['newspaper_name'] = newspaper['pub_companyName']
+            ep_papers[idx]['city'] = newspaper['Streetaddresscity']
+            ep_papers[idx]['county'] = newspaper['County']
+        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state)
     else:
-        return render_template('index.html', cssurl = css_url, states = states, dcpapers = DC_papers, state=None)
+        return render_template('index.html', cssurl = css_url, states = states, state=None)
 
 
 @app.route('/select/', methods=['POST', 'GET'])
@@ -83,30 +76,6 @@ def get_state():
     else:
         return render_template('selectstate.html', states=states)
 
-
-# @app.route('/', methods=['GET', 'POST'])
-# def show_index():
-#     if request.method == 'POST':
-#         return redirect(url_for('state', state=request.form['state']))
-#     else:
-#         css_url = url_for('static', filename='style.css')
-#         return render_template('index.html', cssurl = css_url, states = states, dcpapers = DC_papers)
-#
-# @app.route('/select_state')
-# def form():
-#     return render_template('selectstate.html', states=states)
-#
-# @app.route('/state/<state>', methods=['GET', 'POST'])
-# def state_select(state=None):
-#     if request.method == 'POST':
-#         return redirect(url_for('state',state=state))
-#     else:
-#         return render_template('index.html', cssurl = css_url, states = states, dcpapers = DC_papers, state=state)
-
-# @app.route('/state_select', methods=['GET','POST'])
-# def state_select():
-#     select = request.form.get('state_select')
-#     return(str(select))
 
 if __name__=='__main__':
     app.run(debug=True)
