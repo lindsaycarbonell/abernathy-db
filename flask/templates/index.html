@@ -24,15 +24,8 @@
   {% if state %}
     <h1>{{state}}</h1>
 
-    <!-- <form method="POST" action="/state/">
-      <select name="state" class="form-control" onchange="this.form.submit()">
-        {% for state in states %}
-          <option value="{{ state[0] }}">{{ state[0] }}</option>
-        {% endfor %}
-      </select>
-    </form> -->
+
     <a href="/select/">Select another state</a>
-    <!-- <a href="/merge/?state={{state}}">Attempt merge</a> -->
     <a href="/{{state}}/merge/">Attempt merge</a>
   <div class="row">
     <div class="{{ 'col-md-4' if merged_papers else 'col-md-6' }}">
@@ -74,7 +67,6 @@
           <tr>
             <th>newspaper_name</th>
             <th>city</th>
-            <th>county</th>
           </tr>
         </thead>
         {% for k,v in merged_papers.items()|reverse: %}
@@ -83,8 +75,6 @@
             {% if key == 'newspaper_name' %}
               <th scope="row">{{ value }}</th>
             {% elif key == 'city' %}
-              <th>{{ value }}</th>
-            {% elif key == 'county' %}
               <th>{{ value }}</th>
             {% else %}
               <th>unknown key: {{ value }}</th>
@@ -139,7 +129,8 @@
 
     <script>
       $(document).ready(function(){
-        $('.state-table').DataTable({
+
+        $('#merge_table').DataTable({
           dom: 'Bfrtip',
           buttons: [
             'csv', 'excel', 'copy'
@@ -149,6 +140,31 @@
           colReorder:true,
           select:true
         });
+        $('#db_table').DataTable({
+          dom: 'Bfrtip',
+          buttons: [
+            'csv', 'excel', 'copy'
+          ],
+          paging:false,
+          fixedHeader:true,
+          colReorder:true,
+          select:true
+        });
+        $('#ep_table').DataTable({
+          dom: 'Bfrtip',
+          buttons: [
+            'csv', 'excel', 'copy'
+          ],
+          paging:false,
+          fixedHeader:true,
+          colReorder:true,
+          select:true
+        });
+
+
+
+
+
 
       });
     </script>
