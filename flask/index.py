@@ -68,6 +68,10 @@ def form():
         ep_total = len(ep_papers)
         # print('db_total: %s \n ep_total: %s' % (db_total, ep_total))
 
+        # --- check to see if coming from /merge or /select ---
+        # if merged_papers:
+        #     return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total, merged_papers=merged_papers)
+        # else:
         return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total)
     else:
         return render_template('index.html', cssurl = css_url, states = states, state=None)
@@ -81,6 +85,22 @@ def get_state():
         return redirect(url_for('/', state=state))
     else:
         return render_template('selectstate.html', states=states)
+
+@app.route('/merge/', methods=['POST', 'GET'])
+def attempt_merge():
+    this_state = request.args.get('state')
+    state_str = [this_state][0].strip("[u'").strip("''")
+
+    merged_papers = defaultdict(dict)
+    for idx, newspaper in enumerate(query_db('SELECT t1.newspaper_name, t2.pub_companyName, t1.city, t2.Streetaddresscity FROM (SELECT * FROM newspaper WHERE state = "' + state_str + '") AS t1 INNER JOIN ep_2017 AS t2 ON (t1.newspaper_name = t2.pub_companyName OR "The " || trim(replace(t1.newspaper_name,"The","")) = t2.pub_companyName) AND (UPPER(t1.city) = UPPER(t2.Streetaddresscity)) ORDER BY t1.newspaper_name ASC')):
+        # print newspaper['t1.newspaper_name']
+        merged_papers[idx]['newspaper_name'] = newspaper['t1.newspaper_name']
+        merged_papers[idx]['city'] = newspaper['t1.city']
+
+    print urllib.urlencode(merged_papers)
+
+    return render_template('merge.html', merged_papers=merged_papers)
+    # return redirect(url_for('/', merged_papers))
 
 
 if __name__=='__main__':

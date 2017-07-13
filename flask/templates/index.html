@@ -18,6 +18,9 @@
   </head>
   <body>
   <div class="container-fluid">
+
+  
+
   {% if state %}
     <h1>{{state}}</h1>
 
@@ -29,8 +32,9 @@
       </select>
     </form> -->
     <a href="/select/">Select another state</a>
+    <a href="/merge/?state={{state}}">Attempt merge</a>
   <div class="row">
-    <div class="col-md-6">
+    <div class="{{ 'col-md-4' if merged_papers else 'col-md-6' }}">
       <h3>DB total: {{db_total}}</h3>
       <table id="db_table" class="state-table table table-bordered">
         <thead>
@@ -60,6 +64,36 @@
         </tr>
       </table>
     </div><!--./col-->
+
+    {% if merged_papers %}
+    <div class="col-md-4">
+      <h3>Merge total: {{merge_total}}</h3>
+      <table id="merge_table" class="state-table table table-bordered">
+        <thead>
+          <tr>
+            <th>newspaper_name</th>
+            <th>city</th>
+            <th>county</th>
+          </tr>
+        </thead>
+        {% for k,v in merged_papers.items()|reverse: %}
+          <tr>
+          {% for key, value in v.items()|reverse: %}
+            {% if key == 'newspaper_name' %}
+              <th scope="row">{{ value }}</th>
+            {% elif key == 'city' %}
+              <th>{{ value }}</th>
+            {% elif key == 'county' %}
+              <th>{{ value }}</th>
+            {% else %}
+              <th>unknown key: {{ value }}</th>
+            {% endif %}
+        {% endfor %}
+        {% endfor %}
+        </tr>
+      </table>
+    </div><!--./col-->
+    {% endif %}
 
     <div class="col-md-6">
       <h3>EP total: {{ep_total}}</h3>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<head>
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+
+</head>
+
+<body onload="$('#form-merge').submit()">
+  <h1>{{ merged_papers }}</h1>
+<form id="form-merge" method="POST" action="/">
+  <input value="{{ merged_papers }}" type="hidden" name="merge_tables" id="merge_tables"/>
+</form>
+</body>
+
+</html>
