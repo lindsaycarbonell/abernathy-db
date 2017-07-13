@@ -14,7 +14,7 @@
   </head>
   <body>
     <h1>{{selected_state}}</h1>
-    <form method="POST" action="/">
+    <form method="POST" action="{{url_for('get_state_page', state=state)}}">
       <select name="state" class="form-control" onchange="this.form.submit()">
         {% for state in states %}
           <option value="{{ state[0] }}">{{ state[0] }}</option>

@@ -1,7 +1,9 @@
 # http://flask.pocoo.org/docs/0.12/quickstart/
-from flask import Flask, url_for, request, g, redirect
+from flask import Flask, url_for, request, g, redirect, flash, session
 from flask import render_template
 app = Flask(__name__)
+
+app.secret_key = '8XGO8DVb65__2MTi5yssLX'
 
 from collections import defaultdict
 
@@ -44,37 +46,64 @@ with app.app_context():
 
 
 @app.route('/', methods=['GET', 'POST'])
-def form():
-    css_url = url_for('static', filename='style.css')
+def show_home():
     if request.method == 'POST':
         state=request.form['state']
-        ## get DB state data needed to populate table
-        this_state=request.form['state']
-        state_papers = defaultdict(dict)
-        for idx, newspaper in enumerate(query_db('select * from newspaper where state = ?', [this_state])):
-            state_papers[idx]['newspaper_id'] = newspaper['newspaper_id']
-            state_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
-            state_papers[idx]['city'] = newspaper['city']
-            state_papers[idx]['county'] = newspaper['county']
-        ## ...and get it from EP too
-        ep_papers = defaultdict(dict)
-        for idx, newspaper in enumerate(query_db('SELECT * FROM ep_2017 WHERE Streetaddressstate = ?', [this_state])):
-            ep_papers[idx]['newspaper_name'] = newspaper['pub_companyName']
-            ep_papers[idx]['city'] = newspaper['Streetaddresscity']
-            ep_papers[idx]['county'] = newspaper['County']
-
-        ## get counts
-        db_total = len(state_papers)
-        ep_total = len(ep_papers)
-        # print('db_total: %s \n ep_total: %s' % (db_total, ep_total))
-
-        # --- check to see if coming from /merge or /select ---
-        # if merged_papers:
-        #     return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total, merged_papers=merged_papers)
-        # else:
-        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total)
+        css_url = url_for('static', filename='style.css')
+        return redirect(url_for('get_state_page', state=state))
     else:
-        return render_template('index.html', cssurl = css_url, states = states, state=None)
+        return render_template('selectstate.html', states=states)
+
+@app.route('/clear', methods=['GET', 'POST'])
+def clear_merge_attempt():
+        query_db('DROP TABLE IF EXISTS merge_attempt')
+        flash('Merge attempt dropped!')
+        return redirect(url_for('show_home'))
+
+@app.route('/<state>/', methods=['POST', 'GET'])
+def get_state_page(state):
+    css_url = url_for('static', filename='style.css')
+    this_state=state
+    state_papers = defaultdict(dict)
+    for idx, newspaper in enumerate(query_db('select * from newspaper where state = ?', [this_state])):
+        state_papers[idx]['newspaper_id'] = newspaper['newspaper_id']
+        state_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
+        state_papers[idx]['city'] = newspaper['city']
+        state_papers[idx]['county'] = newspaper['county']
+    ## ...and get it from EP too
+    ep_papers = defaultdict(dict)
+    for idx, newspaper in enumerate(query_db('SELECT * FROM ep_2017 WHERE Streetaddressstate = ?', [this_state])):
+        ep_papers[idx]['newspaper_name'] = newspaper['pub_companyName']
+        ep_papers[idx]['city'] = newspaper['Streetaddresscity']
+        ep_papers[idx]['county'] = newspaper['County']
+
+    ## get counts
+    db_total = len(state_papers)
+    ep_total = len(ep_papers)
+
+    try:
+        query_db('SELECT 1 FROM merge_attempt LIMIT 1;')
+        merge_exists = True
+    except:
+        merge_exists = False
+
+    if merge_exists:
+        merged_papers = defaultdict(dict)
+        ## ...and from the merged_papers
+        for idx, newspaper in enumerate(query_db('SELECT * FROM merge_attempt ORDER BY newspaper_name ASC')):
+            merged_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
+            merged_papers[idx]['city'] = newspaper['city']
+
+        merge_total = len(merged_papers)
+
+        # for idx,newspaper in enumerate(query_db('SELECT t1.newspaper_name, pub_companyName, city, Streetaddresscity FROM merge_attempt')):
+        #     print(newspaper['newspaper_name'])
+
+        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total, merged_papers=merged_papers, merge_total=merge_total)
+    else:
+        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total)
+
+
 
 
 @app.route('/select/', methods=['POST', 'GET'])
@@ -86,21 +115,24 @@ def get_state():
     else:
         return render_template('selectstate.html', states=states)
 
-@app.route('/merge/', methods=['POST', 'GET'])
-def attempt_merge():
-    this_state = request.args.get('state')
+@app.route('/<state>/merge/', methods=['POST', 'GET'])
+def attempt_merge(state):
+    # this_state = request.args.get('state')
+    this_state=state
     state_str = [this_state][0].strip("[u'").strip("''")
 
-    merged_papers = defaultdict(dict)
-    for idx, newspaper in enumerate(query_db('SELECT t1.newspaper_name, t2.pub_companyName, t1.city, t2.Streetaddresscity FROM (SELECT * FROM newspaper WHERE state = "' + state_str + '") AS t1 INNER JOIN ep_2017 AS t2 ON (t1.newspaper_name = t2.pub_companyName OR "The " || trim(replace(t1.newspaper_name,"The","")) = t2.pub_companyName) AND (UPPER(t1.city) = UPPER(t2.Streetaddresscity)) ORDER BY t1.newspaper_name ASC')):
-        # print newspaper['t1.newspaper_name']
-        merged_papers[idx]['newspaper_name'] = newspaper['t1.newspaper_name']
-        merged_papers[idx]['city'] = newspaper['t1.city']
+    query_db('DROP TABLE IF EXISTS merge_attempt')
+    flash('Old merge table dropped!')
+    query_db('CREATE TABLE merge_attempt AS SELECT t1.newspaper_name AS newspaper_name, t1.city AS city FROM (SELECT * FROM newspaper WHERE state = "' + state_str + '") AS t1 INNER JOIN ep_2017 AS t2 ON (t1.newspaper_name = t2.pub_companyName OR "The " || trim(replace(t1.newspaper_name,"The","")) = t2.pub_companyName) AND (UPPER(t1.city) = UPPER(t2.Streetaddresscity)) ORDER BY t1.newspaper_name ASC')
+    flash('Merge table created!')
+    return redirect(url_for('get_state_page', state=state))
 
-    print urllib.urlencode(merged_papers)
-
-    return render_template('merge.html', merged_papers=merged_papers)
-    # return redirect(url_for('/', merged_papers))
+    # merged_papers = defaultdict(dict)
+    # for idx, newspaper in enumerate(query_db('SELECT t1.newspaper_name, t2.pub_companyName, t1.city, t2.Streetaddresscity FROM (SELECT * FROM newspaper WHERE state = "' + state_str + '") AS t1 INNER JOIN ep_2017 AS t2 ON (t1.newspaper_name = t2.pub_companyName OR "The " || trim(replace(t1.newspaper_name,"The","")) = t2.pub_companyName) AND (UPPER(t1.city) = UPPER(t2.Streetaddresscity)) ORDER BY t1.newspaper_name ASC')):
+    #     merged_papers[idx]['newspaper_name'] = newspaper['t1.newspaper_name']
+    #     merged_papers[idx]['city'] = newspaper['t1.city']
+    #
+    # return render_template('merge.html', merged_papers=merged_papers)
 
 
 if __name__=='__main__':
