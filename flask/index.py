@@ -47,12 +47,12 @@ with app.app_context():
 
 @app.route('/', methods=['GET', 'POST'])
 def show_home():
+    css_url = url_for('static', filename='style.css')
     if request.method == 'POST':
         state=request.form['state']
-        css_url = url_for('static', filename='style.css')
         return redirect(url_for('get_state_page', state=state))
     else:
-        return render_template('selectstate.html', states=states)
+        return render_template('selectstate.html', states=states, cssurl=css_url)
 
 @app.route('/clear', methods=['GET', 'POST'])
 def clear_merge_attempt():
@@ -69,13 +69,13 @@ def get_state_page(state):
         state_papers[idx]['newspaper_id'] = newspaper['newspaper_id']
         state_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
         state_papers[idx]['city'] = newspaper['city']
-        state_papers[idx]['county'] = newspaper['county']
+        # state_papers[idx]['county'] = newspaper['county']
     ## ...and get it from EP too
     ep_papers = defaultdict(dict)
     for idx, newspaper in enumerate(query_db('SELECT * FROM ep_2017 WHERE Streetaddressstate = ?', [this_state])):
         ep_papers[idx]['newspaper_name'] = newspaper['pub_companyName']
         ep_papers[idx]['city'] = newspaper['Streetaddresscity']
-        ep_papers[idx]['county'] = newspaper['County']
+        # ep_papers[idx]['county'] = newspaper['County']
 
     ## get counts
     db_total = len(state_papers)
@@ -89,17 +89,29 @@ def get_state_page(state):
 
     if merge_exists:
         merged_papers = defaultdict(dict)
+        unmerged_papers = defaultdict(dict)
         ## ...and from the merged_papers
         for idx, newspaper in enumerate(query_db('SELECT * FROM merge_attempt ORDER BY newspaper_name ASC')):
             merged_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
             merged_papers[idx]['city'] = newspaper['city']
 
-        merge_total = len(merged_papers)
+
+
+        for idx, newspaper in enumerate(query_db('SELECT newspaper_name, city FROM newspaper WHERE newspaper_name NOT IN (SELECT newspaper_name FROM merge_attempt) AND state = ?', [this_state])):
+            # print newspaper['newspaper_name']
+            unmerged_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
+            unmerged_papers[idx]['city'] = newspaper['city']
+
+
+        # print unmerged_papers[0]
+        unmerged_total = len(unmerged_papers)
+        print unmerged_total
+        merged_total = len(merged_papers)
 
         # for idx,newspaper in enumerate(query_db('SELECT t1.newspaper_name, pub_companyName, city, Streetaddresscity FROM merge_attempt')):
         #     print(newspaper['newspaper_name'])
 
-        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total, merged_papers=merged_papers, merge_total=merge_total)
+        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total, merged_papers=merged_papers, merged_total=merged_total, unmerged_papers=unmerged_papers, unmerged_total=unmerged_total)
     else:
         return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total)
 
@@ -108,12 +120,12 @@ def get_state_page(state):
 
 @app.route('/select/', methods=['POST', 'GET'])
 def get_state():
+    css_url = url_for('static', filename='style.css')
     if request.method == 'POST':
         state=request.form['state']
-        css_url = url_for('static', filename='style.css')
         return redirect(url_for('/', state=state))
     else:
-        return render_template('selectstate.html', states=states)
+        return render_template('selectstate.html', states=states, cssurl=css_url)
 
 @app.route('/<state>/merge/', methods=['POST', 'GET'])
 def attempt_merge(state):

@@ -22,34 +22,96 @@
 
 
   {% if state %}
-    <h1>{{state}}</h1>
+  <header class="row idx-header">
+    <div class="col-12 justify-content-center">
+      <h1 id="state-title">{{state}}</h1>
+      <h3><span>{{db_total-merged_total}}</span> papers left to check and <span></span> papers with no matches.</h3>
+    </div>
+  </header>
 
 
     <a href="/select/">Select another state</a>
     <a href="/{{state}}/merge/">Attempt merge</a>
+    <a id="btn_make_merge" data-toggle="modal" data-target=".bd-example-modal-lg">These rows are the same</a>
+
+    <div class="modal fade bd-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        <div class="modal-body">
+          <div class="container">
+            <form>
+              <div class="form-group row">
+                <label for="inputEpSel" class="col-sm-2 col-form-label"></label>
+                <div class="col-sm-10">
+                  <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="inputDbSel" class="col-sm-2 col-form-label"></label>
+                <div class="col-sm-10">
+                  <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
+                </div>
+              </div>
+
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
   <div class="row">
-    <div class="{{ 'col-md-4' if merged_papers else 'col-md-6' }}">
-      <h3>DB total: {{db_total}}</h3>
+    <div class="col-md-6">
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active" data-toggle="tab" href="#pane_db" role="tab">DB</a>
+        </li>
+        {% if merged_papers %}
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#pane_merged" role="tab">Merged</a>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#pane_ep" role="tab">E/P</a>
+        </li>
+      </ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+
+    <div id="pane_db" class="tab-pane active {{ 'col-md-6' if merged_papers else 'col-md-6' }}" role="tabpanel">
+      <h2>Database Table</h2>
+      <h3>Total rows: {{db_total}}</h3>
+      <p>This table shows the newspapers in our database for 2017.</p>
       <table id="db_table" class="state-table table table-bordered">
         <thead>
           <tr>
             <th>newspaper_id</th>
             <th>newspaper_name</th>
             <th>city</th>
-            <th>county</th>
           </tr>
         </thead>
         {% for k,v in state_papers.items()|reverse: %}
-          <tr>
+          <tr class="db-row table-row">
           {% for key, value in v.items()|reverse: %}
             {% if key == 'newspaper_id' %}
               <th scope="row">{{ value }}</th>
             {% elif key == 'newspaper_name' %}
-              <th>{{ value }}</th>
+              <th class="th-newspaper-name">{{ value }}</th>
             {% elif key == 'city' %}
-              <th>{{ value }}</th>
-            {% elif key == 'county' %}
-              <th>{{ value }}</th>
+              <th class="th-city">{{ value }}</th>
             {% else %}
               <th>unknown key: {{ value }}</th>
             {% endif %}
@@ -60,9 +122,12 @@
     </div><!--./col-->
 
     {% if merged_papers %}
-    <div class="col-md-4">
-      <h3>Merge total: {{merge_total}}</h3>
-      <table id="merge_table" class="state-table table table-bordered">
+
+    <div id="pane_merged" class="tab-pane col-md-6" role="tabpanel">
+      <h2>Merged with E/P Table</h2>
+      <h3>Total rows: {{merged_total}}</h3>
+      <p>This table shows successful merges with E/P and our database.</p>
+      <table id="merged_table" class="state-table table table-bordered">
         <thead>
           <tr>
             <th>newspaper_name</th>
@@ -70,12 +135,12 @@
           </tr>
         </thead>
         {% for k,v in merged_papers.items()|reverse: %}
-          <tr>
+          <tr class="merged-row table-row">
           {% for key, value in v.items()|reverse: %}
             {% if key == 'newspaper_name' %}
-              <th scope="row">{{ value }}</th>
+              <th scope="row" class="th-newspaper-name">{{ value }}</th>
             {% elif key == 'city' %}
-              <th>{{ value }}</th>
+              <th class="th-city">{{ value }}</th>
             {% else %}
               <th>unknown key: {{ value }}</th>
             {% endif %}
@@ -86,25 +151,24 @@
     </div><!--./col-->
     {% endif %}
 
-    <div class="{{ 'col-md-4' if merged_papers else 'col-md-6' }}">
-      <h3>EP total: {{ep_total}}</h3>
+    <div id="pane_ep" class="tab-pane col-md-6" role="tabpanel">
+      <h2>Editor and Publisher Table</h2>
+      <h3>Total rows: {{ep_total}}</h3>
+      <p>This table shows the newspapers in the E/P database for 2017.</p>
       <table id="ep_table" class="state-table table table-bordered">
         <thead>
           <tr>
             <th>newspaper_name</th>
             <th>city</th>
-            <th>county</th>
           </tr>
         </thead>
         {% for k,v in ep_papers.items()|reverse: %}
-          <tr>
+          <tr class="ep-row table-row">
           {% for key, value in v.items()|reverse: %}
             {% if key == 'newspaper_name' %}
-              <th scope="row">{{ value }}</th>
+              <th scope="row" class="th-newspaper-name">{{ value }}</th>
             {% elif key == 'city' %}
-              <th>{{ value }}</th>
-            {% elif key == 'county' %}
-              <th>{{ value }}</th>
+              <th class="th-city">{{ value }}</th>
             {% else %}
               <th>unknown key: {{ value }}</th>
             {% endif %}
@@ -113,6 +177,36 @@
         </tr>
       </table>
     </div><!--./col-->
+  </div><!-- ./tab-content -->
+</div><!--./col wrapped around tab pane-->
+  {% if merged_papers %}
+  <div class="col-md-6">
+    <h2>Unmerged Table</h2>
+    <h3>Total rows: {{unmerged_total}}</h3>
+    <p>This table shows rows from our database that have not merged with E/P.</p>
+    <table id="unmerged_table" class="state-table table table-bordered">
+      <thead>
+        <tr>
+          <th>newspaper_name</th>
+          <th>city</th>
+        </tr>
+      </thead>
+      {% for k,v in unmerged_papers.items()|reverse: %}
+        <tr class="unmerged-row table-row">
+        {% for key, value in v.items()|reverse: %}
+          {% if key == 'newspaper_name' %}
+            <th scope="row" class="th-newspaper-name">{{ value }}</th>
+          {% elif key == 'city' %}
+            <th class="th-city">{{ value }}</th>
+          {% else %}
+            <th>unknown key: {{ value }}</th>
+          {% endif %}
+      {% endfor %}
+      {% endfor %}
+      </tr>
+    </table>
+  </div><!--./col-->
+  {% endif %}
   {% else %}
     <a href="/select">Select a state</a>
   {% endif %}
@@ -130,27 +224,10 @@
     <script>
       $(document).ready(function(){
 
-        $('#merge_table').DataTable({
-          dom: 'Bfrtip',
-          buttons: [
-            'csv', 'excel', 'copy'
-          ],
-          paging:false,
-          fixedHeader:true,
-          colReorder:true,
-          select:true
-        });
-        $('#db_table').DataTable({
-          dom: 'Bfrtip',
-          buttons: [
-            'csv', 'excel', 'copy'
-          ],
-          paging:false,
-          fixedHeader:true,
-          colReorder:true,
-          select:true
-        });
-        $('#ep_table').DataTable({
+        var sel_unmerge;
+        var sel_ep;
+
+        $('.state-table').DataTable({
           dom: 'Bfrtip',
           buttons: [
             'csv', 'excel', 'copy'
@@ -161,9 +238,20 @@
           select:true
         });
 
+        $('.table-row').click(function(){
+            if ($(this).hasClass('unmerged-row')){
+              sel_unmerge = $(this).find('.th-newspaper-name').html();
+            }
+            else if ($(this).hasClass('ep-row')){
+              sel_ep = $(this).find('.th-newspaper-name').html();
+            }
+            console.log("unmerge: " + sel_unmerge);
+            console.log("ep: " + sel_ep);
+        });
 
-
-
+        $('#btn_make_merge').click(function(){
+          $('' + sel_ep).appendTo($('[for="inputEpSel"]'));
+        });
 
 
       });

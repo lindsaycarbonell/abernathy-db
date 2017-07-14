@@ -13,14 +13,24 @@
 
   </head>
   <body>
-    <h1>{{selected_state}}</h1>
-    <form method="POST" action="{{url_for('get_state_page', state=state)}}">
-      <select name="state" class="form-control" onchange="this.form.submit()">
-        {% for state in states %}
-          <option value="{{ state[0] }}">{{ state[0] }}</option>
-        {% endfor %}
-      </select>
-    </form>
+    <div class="container page-center-cont">
+      <div class="row justify-content-center">
+        <div class="col-3">
+          <h1>Select a state:</h1>
+        </div>
+    </div>
+      <div class="row justify-content-center">
+        <div class="col-3">
+          <form method="POST" action="{{url_for('get_state_page', state=state)}}">
+            <select name="state" class="form-control" onchange="this.form.submit()">
+              {% for state in states %}
+              <option value="{{ state[0] }}">{{ state[0] }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </div>
+    </div>
+  </div>
     <!-- jQuery first, then Tether, then Bootstrap JS. -->
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
