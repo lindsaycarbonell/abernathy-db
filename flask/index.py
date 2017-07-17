@@ -135,7 +135,7 @@ def attempt_merge(state):
 
     query_db('DROP TABLE IF EXISTS merge_attempt')
     flash('Old merge table dropped!')
-    query_db('CREATE TABLE merge_attempt AS SELECT t1.newspaper_name AS newspaper_name, t1.city AS city FROM (SELECT * FROM newspaper WHERE state = "' + state_str + '") AS t1 INNER JOIN ep_2017 AS t2 ON (t1.newspaper_name = t2.pub_companyName OR "The " || trim(replace(t1.newspaper_name,"The","")) = t2.pub_companyName) AND (UPPER(t1.city) = UPPER(t2.Streetaddresscity)) ORDER BY t1.newspaper_name ASC')
+    query_db('CREATE TABLE merge_attempt AS SELECT t1.newspaper_name AS newspaper_name, t1.city AS city FROM (SELECT * FROM newspaper WHERE state = "' + state_str + '") AS t1 INNER JOIN ep_2017 AS t2 ON (t1.newspaper_name = t2.pub_companyName OR "The " || trim(replace(t1.newspaper_name,"The","") OR REPLACE(t1.newspaper_name,"-"," ") = REPLACE(t2.pub_companyName,"-"," ")) = t2.pub_companyName) AND (UPPER(t1.city) = UPPER(t2.Streetaddresscity)) ORDER BY t1.newspaper_name ASC')
     flash('Merge table created!')
     return redirect(url_for('get_state_page', state=state))
 

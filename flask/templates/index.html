@@ -25,7 +25,9 @@
   <header class="row idx-header">
     <div class="col-12 justify-content-center">
       <h1 id="state-title">{{state}}</h1>
-      <h3><span>{{db_total-merged_total}}</span> papers left to check and <span></span> papers with no matches.</h3>
+      {% if merged_total %}
+      <h3><span>{{ db_total-merged_total }}</span> papers left to check and <span></span> papers with no matches.</h3>
+      {% endif %}
     </div>
   </header>
 
