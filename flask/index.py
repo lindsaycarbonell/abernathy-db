@@ -133,11 +133,26 @@ def attempt_merge(state):
     this_state=state
     state_str = [this_state][0].strip("[u'").strip("''")
 
-    query_db('DROP TABLE IF EXISTS merge_attempt')
-    flash('Old merge table dropped!')
-    query_db('CREATE TABLE merge_attempt AS SELECT t1.newspaper_name AS newspaper_name, t1.city AS city FROM (SELECT * FROM newspaper WHERE state = "' + state_str + '") AS t1 INNER JOIN ep_2017 AS t2 ON (t1.newspaper_name = t2.pub_companyName OR "The " || trim(replace(t1.newspaper_name,"The","") OR REPLACE(t1.newspaper_name,"-"," ") = REPLACE(t2.pub_companyName,"-"," ")) = t2.pub_companyName) AND (UPPER(t1.city) = UPPER(t2.Streetaddresscity)) ORDER BY t1.newspaper_name ASC')
-    flash('Merge table created!')
-    return redirect(url_for('get_state_page', state=state))
+    print query_db('DROP VIEW IF EXISTS merge_attempt')
+
+    # flash('Old merge view dropped!')
+    # query_db('SELECT * FROM newspaper')
+
+    # query_db('''CREATE VIEW IF NOT EXISTS newspaper_2017 AS
+    # SELECT * FROM db_2017 AS t1
+    # INNER JOIN newspaper AS t2
+    # ON t1.newspaper_id = t2.newspaper_id''')
+
+    query_db('''CREATE VIEW merge_attempt AS SELECT t1.newspaper_name AS newspaper_name, t1.city AS city
+    FROM newspaper_2017 AS t1
+    INNER JOIN ep_2017 AS t2
+    ON ( t1.newspaper_name = t2.pub_companyName
+    OR "The " || trim(replace(t1.newspaper_name,'The','')) = t2.pub_companyName
+    OR REPLACE(t1.newspaper_name,"-"," ") = REPLACE(t2.pub_companyName,"-"," ")
+    OR trim(replace(t1.newspaper_name,'The','')) = t2.pub_companyName)
+    AND (trim(REPLACE(UPPER(t1.city),"CITY","")) = trim(REPLACE(UPPER(t2.Streetaddresscity),"CITY","")))
+    WHERE t1.state = "AZ"
+    ORDER BY newspaper_name ASC''')
 
     # merged_papers = defaultdict(dict)
     # for idx, newspaper in enumerate(query_db('SELECT t1.newspaper_name, t2.pub_companyName, t1.city, t2.Streetaddresscity FROM (SELECT * FROM newspaper WHERE state = "' + state_str + '") AS t1 INNER JOIN ep_2017 AS t2 ON (t1.newspaper_name = t2.pub_companyName OR "The " || trim(replace(t1.newspaper_name,"The","")) = t2.pub_companyName) AND (UPPER(t1.city) = UPPER(t2.Streetaddresscity)) ORDER BY t1.newspaper_name ASC')):
@@ -145,6 +160,7 @@ def attempt_merge(state):
     #     merged_papers[idx]['city'] = newspaper['t1.city']
     #
     # return render_template('merge.html', merged_papers=merged_papers)
+    return redirect(url_for('get_state_page', state=state))
 
 
 if __name__=='__main__':
