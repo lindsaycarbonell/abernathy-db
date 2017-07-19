@@ -40,16 +40,6 @@ with app.app_context():
 
     states = query_db('SELECT state FROM newspaper GROUP BY state')
 
-    ## Grab a state from EP in a tuple
-    ep_papers = defaultdict(dict)
-    ex_state = 'CT'
-    address = 'Streetaddressstate'
-    con = sqlite3.connect('abernathy.db')
-    cur = con.cursor()
-    cur.execute('SELECT * FROM ep_2017 WHERE Streetaddressstate = ?', [ex_state])
-    # print cur.fetchall()
-    con.close()
-
 
 @app.route('/', methods=['GET', 'POST'])
 def show_home():
@@ -76,13 +66,12 @@ def get_state_page(state):
         state_papers[idx]['newspaper_id'] = newspaper['newspaper_id']
         state_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
         state_papers[idx]['city'] = newspaper['city']
-        # state_papers[idx]['county'] = newspaper['county']
+
     ## ...and get it from EP too
     ep_papers = defaultdict(dict)
     for idx, newspaper in enumerate(query_db('SELECT * FROM ep_2017 WHERE Streetaddressstate = ?', [this_state])):
         ep_papers[idx]['newspaper_name'] = newspaper['pub_companyName']
         ep_papers[idx]['city'] = newspaper['Streetaddresscity']
-        # ep_papers[idx]['county'] = newspaper['County']
 
     ## get counts
     db_total = len(state_papers)
@@ -102,21 +91,13 @@ def get_state_page(state):
             merged_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
             merged_papers[idx]['city'] = newspaper['city']
 
-
-
         for idx, newspaper in enumerate(query_db('SELECT newspaper_name, city FROM newspaper WHERE newspaper_name NOT IN (SELECT newspaper_name FROM merge_attempt) AND state = ?', [this_state])):
             # print newspaper['newspaper_name']
             unmerged_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
             unmerged_papers[idx]['city'] = newspaper['city']
 
-
-        # print unmerged_papers[0]
         unmerged_total = len(unmerged_papers)
-        # print unmerged_total
         merged_total = len(merged_papers)
-
-        # for idx,newspaper in enumerate(query_db('SELECT t1.newspaper_name, pub_companyName, city, Streetaddresscity FROM merge_attempt')):
-        #     print(newspaper['newspaper_name'])
 
         return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total, merged_papers=merged_papers, merged_total=merged_total, unmerged_papers=unmerged_papers, unmerged_total=unmerged_total)
     else:
@@ -160,18 +141,19 @@ def update_db():
 
         if db_newcity != db_oldcity:
             print 'update city in db...'
-            # print query_db('SELECT newspaper_name, city FROM newspaper_2017 WHERE state = "%s" AND newspaper_name = "%s"' % (state, db_oldpaper))
-            # print query_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "DB", "%s", "%s", "CITY", "%s")' % (state, db_oldpaper, db_oldcity, db_newcity))
+
             commit_db('UPDATE newspaper SET city = "%s" WHERE state = "%s" AND newspaper_name = "%s"' % (db_newcity, state, db_oldpaper))
             commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "DB", "%s", "%s", "CITY", "%s")' % (state, db_oldpaper, db_oldcity, db_newcity))
 
         if ep_newcity != ep_oldcity:
             print 'update city in ep...'
+
             commit_db('UPDATE ep_2017 SET Streetaddresscity = "%s" WHERE Streetaddressstate = "%s" AND pub_companyName = "%s"' % (ep_newcity, state, ep_oldpaper))
             commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "EP", "%s", "%s", "CITY", "%s")' % (state, ep_oldpaper, ep_oldcity, ep_newcity))
 
         if db_newpaper != db_oldpaper:
             print 'update paper in db...'
+
             commit_db('UPDATE newspaper SET newspaper_name = "%s" WHERE state = "%s" AND newspaper_name = "%s"' % (db_newpaper, state, db_oldpaper))
             commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "DB", "%s", "%s", "PAPER", "%s")' % (state, db_oldpaper, db_oldcity, db_newpaper))
 
@@ -181,32 +163,18 @@ def update_db():
             commit_db('UPDATE ep_2017 SET pub_companyName = "%s" WHERE Streetaddressstate = "%s" AND pub_companyName = "%s"' % (ep_newpaper, state, ep_oldpaper))
             commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "EP", "%s", "%s", "PAPER", "%s")' % (state, ep_oldpaper, ep_oldcity, ep_newpaper))
 
-
-
-        # query_db('SELECT * FROM ep_2017 WHERE Streetaddressstate = "%s" AND pub_companyName = "%s"' % (state, ep_oldpaper))
         return redirect(url_for('get_state_page', state=state))
-        # return render_template('update.html', db_newcity=db_newcity)
+
     else:
         return render_template('update.html', state=state, cssurl=css_url)
 
 @app.route('/<state>/merge/', methods=['POST', 'GET'])
 def attempt_merge(state):
-    print 'ATTEMPT MERGE'
-    # this_state = request.args.get('state')
+
     this_state=state
     state_str = [this_state][0].strip("[u'").strip("''")
 
     query_db('DROP VIEW IF EXISTS merge_attempt')
-
-    print 'view dropped'
-
-    # flash('Old merge view dropped!')
-    # query_db('SELECT * FROM newspaper')
-
-    # query_db('''CREATE VIEW IF NOT EXISTS newspaper_2017 AS
-    # SELECT * FROM db_2017 AS t1
-    # INNER JOIN newspaper AS t2
-    # ON t1.newspaper_id = t2.newspaper_id''')
 
     query_db('''CREATE VIEW IF NOT EXISTS merge_attempt AS SELECT t1.newspaper_name AS newspaper_name, t1.city AS city
     FROM newspaper_2017 AS t1
@@ -219,15 +187,62 @@ def attempt_merge(state):
     WHERE t1.state = "%s"
     ORDER BY newspaper_name ASC''' % (state_str))
 
-    print 'view created'
 
-    # merged_papers = defaultdict(dict)
-    # for idx, newspaper in enumerate(query_db('SELECT t1.newspaper_name, t2.pub_companyName, t1.city, t2.Streetaddresscity FROM (SELECT * FROM newspaper WHERE state = "' + state_str + '") AS t1 INNER JOIN ep_2017 AS t2 ON (t1.newspaper_name = t2.pub_companyName OR "The " || trim(replace(t1.newspaper_name,"The","")) = t2.pub_companyName) AND (UPPER(t1.city) = UPPER(t2.Streetaddresscity)) ORDER BY t1.newspaper_name ASC')):
-    #     merged_papers[idx]['newspaper_name'] = newspaper['t1.newspaper_name']
-    #     merged_papers[idx]['city'] = newspaper['t1.city']
-    #
-    # return render_template('merge.html', merged_papers=merged_papers)
     return redirect(url_for('get_state_page', state=state))
+
+@app.route('/<state>/show_merge/', methods=['POST', 'GET'])
+def show_merge(state):
+    this_state=state
+    state_str = [this_state][0].strip("[u'").strip("''")
+
+    query_db('DROP VIEW IF EXISTS final_merge')
+
+    query_db('''
+    CREATE VIEW final_merge AS
+    SELECT newspaper_id, newspaper_name, frequency, AvgPaidCirc AS ep_paid_circ, total_circulation AS db_total_circ, AvgFreeCirc AS ep_free_circ,
+    ABS(CAST(AvgPaidCirc AS INTEGER) - CAST(REPLACE(total_circulation,',','') AS INTEGER)) AS circDiff,
+    AuditBy AS ep_audit_by, AuditDate AS ep_audit_date, ParentCompany AS ep_owner,
+    t1.city AS city, t1.county AS county FROM newspaper_2017 AS t1
+    LEFT OUTER JOIN ep_2017 AS t2 ON
+    ( t1.newspaper_name = t2.pub_companyName
+    OR "The " || trim(replace(t1.newspaper_name,'The','')) = t2.pub_companyName
+    OR  REPLACE(t1.newspaper_name,"-"," ") = REPLACE(t2.pub_companyName,"-"," ")
+    OR trim(replace(t1.newspaper_name,'The','')) = t2.pub_companyName ) AND
+    ( trim(REPLACE(UPPER(t1.city),"CITY","")) = trim(REPLACE(UPPER(t2.Streetaddresscity),"CITY",""))
+    )
+    WHERE t1.state = "%s"
+    ORDER BY newspaper_name ASC
+    ''' % (state_str))
+
+
+    all_merged_papers = defaultdict(dict)
+    ## ...and from the merged_papers
+    for idx, newspaper in enumerate(query_db('''
+    SELECT t1.newspaper_id AS newspaper_id, t1.newspaper_name AS newspaper_name, t1.frequency AS db_frequency, t1.ep_paid_circ AS ep_paid_circ, t2.db_total_circ AS db_total_circ, t1.ep_free_circ AS ep_free_circ, t1.circDiff AS circDiff, t2.freq_2004 AS freq_2004, t2.total_circulation_2004 AS total_circ_2004, t2.owner_name AS db_owner, t1.ep_owner AS ep_owner, t2.city AS city, t2.county AS county, t1.ep_audit_by AS ep_audit_by, t1.ep_audit_date AS ep_audit_date FROM final_merge AS t1
+    LEFT JOIN all_2017 AS t2 ON t2.newspaper_id = t1.newspaper_id
+    ''')):
+        print newspaper['newspaper_id']
+        all_merged_papers[idx]['newspaper_id'] = newspaper['newspaper_id']
+        all_merged_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
+        all_merged_papers[idx]['db_frequency'] = newspaper['db_frequency']
+        all_merged_papers[idx]['ep_paid_circ'] = newspaper['ep_paid_circ']
+        all_merged_papers[idx]['db_total_circ'] = newspaper['db_total_circ']
+        all_merged_papers[idx]['ep_free_circ'] = newspaper['ep_free_circ']
+        all_merged_papers[idx]['circDiff'] = newspaper['circDiff']
+        all_merged_papers[idx]['freq_2004'] = newspaper['freq_2004']
+        all_merged_papers[idx]['total_circ_2004'] = newspaper['total_circ_2004']
+        all_merged_papers[idx]['db_owner'] = newspaper['db_owner']
+        all_merged_papers[idx]['ep_owner'] = newspaper['ep_owner']
+        all_merged_papers[idx]['city'] = newspaper['city']
+        all_merged_papers[idx]['county'] = newspaper['county']
+        all_merged_papers[idx]['ep_audit_by'] = newspaper['ep_audit_by']
+        all_merged_papers[idx]['ep_audit_date'] = newspaper['ep_audit_date']
+
+    print all_merged_papers[4]
+
+    return render_template('finaltable.html', state=state, all_merged_papers=all_merged_papers)
+
+
 
 
 if __name__=='__main__':
