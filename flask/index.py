@@ -31,6 +31,13 @@ with app.app_context():
         cur.close()
         return (rv[0] if rv else None) if one else rv
 
+    def commit_db(query, args=(), one=False):
+        con = sqlite3.connect("abernathy.db")
+        cur = con.cursor()
+        cur.execute(query, args)
+        con.commit()
+        con.close()
+
     states = query_db('SELECT state FROM newspaper GROUP BY state')
 
     ## Grab a state from EP in a tuple
@@ -129,12 +136,50 @@ def get_state():
 
 @app.route('/update/', methods=['POST', 'GET'])
 def update_db():
+    state=request.args.get('state')
     css_url = url_for('static', filename='style.css')
+    query_db('''CREATE TABLE IF NOT EXISTS overall_merge_changes (
+    id integer PRIMARY KEY,
+    state text,
+    db_changed text,
+    old_paper text,
+    old_city text,
+    column_changed text,
+    changed_to text
+    )''')
     if request.method == 'POST':
-        newcity=request.form['inputDbSelCity']
-        print newcity
+        db_newcity=request.form['inputDbSelCity']
+        db_oldcity=request.form['oldDbCity']
+        db_newpaper=request.form['inputDbSelPaper']
+        db_oldpaper=request.form['oldDbPaper']
+
+        ep_newcity=request.form['inputEpSelCity']
+        ep_oldcity=request.form['oldEpCity']
+        ep_newpaper=request.form['inputEpSelPaper']
+        ep_oldpaper=request.form['oldEpPaper']
+
+        if db_newcity != db_oldcity:
+            print 'update city in db...'
+            # print query_db('SELECT newspaper_name, city FROM newspaper_2017 WHERE state = "%s" AND newspaper_name = "%s"' % (state, db_oldpaper))
+            # print query_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "DB", "%s", "%s", "CITY", "%s")' % (state, db_oldpaper, db_oldcity, db_newcity))
+
+            commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "DB", "%s", "%s", "CITY", "%s")' % (state, db_oldpaper, db_oldcity, db_newcity))
+
+        if ep_newcity != ep_oldcity:
+            print 'update city in ep...'
+            print query_db('SELECT pub_companyName, Streetaddresscity FROM ep_2017 WHERE Streetaddressstate = "%s" AND pub_companyName = "%s"' % (state, ep_oldpaper))
+        if db_newpaper != db_oldpaper:
+            print 'update paper in db...'
+            print query_db('SELECT newspaper_name, city FROM newspaper_2017 WHERE state = "%s" AND newspaper_name = "%s"' % (state, db_oldpaper))
+        if ep_newpaper != ep_oldpaper:
+            print 'update paper in ep...'
+            print query_db('SELECT pub_companyName, Streetaddresscity FROM ep_2017 WHERE Streetaddressstate = "%s" AND pub_companyName = "%s"' % (state, ep_oldpaper))
+
+
+
+        # query_db('SELECT * FROM ep_2017 WHERE Streetaddressstate = "%s" AND pub_companyName = "%s"' % (state, ep_oldpaper))
         # return redirect(url_for('/', state=state))
-        return render_template('update.html', newcity=newcity)
+        return render_template('update.html', db_newcity=db_newcity)
     else:
         return render_template('update.html', state=state, cssurl=css_url)
 

@@ -51,19 +51,22 @@
               <div class="form-group col-sm-6">
                 <label for="inputEpSelPaper" class="col-sm-6 col-form-label"></label>
                 <input class="form-control" id="inputEpSelPaper" name="inputEpSelPaper" placeholder="Type new E/P paper name here.">
-
+                <input type="hidden" id="oldEpPaper" name="oldEpPaper">
                 <div class="col-sm-6">
                   <label for="inputEpSelCity" class="col-sm-6 col-form-label"></label>
                   <input class="form-control" id="inputEpSelCity" name="inputEpSelCity" placeholder="Type new E/P city name here.">
+                  <input type="hidden" id="oldEpCity" name="oldEpCity">
                 </div>
               </div>
               <div class="form-group col-sm-6">
                 <label for="inputDbSelPaper" class="col-sm-6 col-form-label"></label>
                 <input class="form-control" id="inputDbSelPaper" name="inputDbSelPaper" placeholder="Type new DB paper name here.">
+                <input type="hidden" id="oldDbPaper" name="oldDbPaper">
                 <div class="col-sm-6">
 
                   <label for="inputDbSelCity" class="col-sm-6 col-form-label"></label>
                   <input class="form-control" id="inputDbSelCity" name="inputDbSelCity" placeholder="Type new DB city name here.">
+                  <input type="hidden" id="oldDbCity" name="oldDbCity">
                 </div>
               </div>
 
@@ -268,10 +271,14 @@
           $('<p>' + sel_ep_city + '</p>').appendTo($('[for="inputEpSelCity"]'));
           $('<p>' + sel_db_city + '</p>').appendTo($('[for="inputDbSelCity"]'));
 
-          $('#inputEpSelPaper').attr('value', sel_ep_name);
-          $('#inputEpSelCity').attr('value', sel_ep_city);
-          $('#inputDbSelPaper').attr('value', sel_db_name);
-          $('#inputDbSelCity').attr('value', sel_db_city);
+          $('#oldEpPaper, #inputEpSelPaper').attr('value', sel_ep_name);
+          $('#inputEpSelCity, #oldEpCity').attr('value', sel_ep_city);
+
+          $('#inputDbSelPaper, #oldDbPaper').attr('value', sel_db_name);
+          $('#inputDbSelCity, #oldDbCity').attr('value', sel_db_city);
+
+
+
         });
 
 
