@@ -1,4 +1,3 @@
-# http://flask.pocoo.org/docs/0.12/quickstart/
 from flask import Flask, url_for, request, g, redirect, flash, session
 from flask import render_template
 app = Flask(__name__)
@@ -56,12 +55,13 @@ def show_home():
 
 @app.route('/clear', methods=['GET', 'POST'])
 def clear_merge_attempt():
-        query_db('DROP TABLE IF EXISTS merge_attempt')
+        query_db('DROP VIEW IF EXISTS merge_attempt')
         flash('Merge attempt dropped!')
         return redirect(url_for('show_home'))
 
 @app.route('/<state>/', methods=['POST', 'GET'])
 def get_state_page(state):
+    print 'GET STATE PAGE'
     css_url = url_for('static', filename='style.css')
     this_state=state
     state_papers = defaultdict(dict)
@@ -105,7 +105,7 @@ def get_state_page(state):
 
         # print unmerged_papers[0]
         unmerged_total = len(unmerged_papers)
-        print unmerged_total
+        # print unmerged_total
         merged_total = len(merged_papers)
 
         # for idx,newspaper in enumerate(query_db('SELECT t1.newspaper_name, pub_companyName, city, Streetaddresscity FROM merge_attempt')):
@@ -127,13 +127,27 @@ def get_state():
     else:
         return render_template('selectstate.html', states=states, cssurl=css_url)
 
+@app.route('/update/', methods=['POST', 'GET'])
+def update_db():
+    css_url = url_for('static', filename='style.css')
+    if request.method == 'POST':
+        newcity=request.form['inputDbSelCity']
+        print newcity
+        # return redirect(url_for('/', state=state))
+        return render_template('update.html', newcity=newcity)
+    else:
+        return render_template('update.html', state=state, cssurl=css_url)
+
 @app.route('/<state>/merge/', methods=['POST', 'GET'])
 def attempt_merge(state):
+    print 'ATTEMPT MERGE'
     # this_state = request.args.get('state')
     this_state=state
     state_str = [this_state][0].strip("[u'").strip("''")
 
-    print query_db('DROP VIEW IF EXISTS merge_attempt')
+    query_db('DROP VIEW IF EXISTS merge_attempt')
+
+    print 'view dropped'
 
     # flash('Old merge view dropped!')
     # query_db('SELECT * FROM newspaper')
@@ -143,16 +157,18 @@ def attempt_merge(state):
     # INNER JOIN newspaper AS t2
     # ON t1.newspaper_id = t2.newspaper_id''')
 
-    query_db('''CREATE VIEW merge_attempt AS SELECT t1.newspaper_name AS newspaper_name, t1.city AS city
+    query_db('''CREATE VIEW IF NOT EXISTS merge_attempt AS SELECT t1.newspaper_name AS newspaper_name, t1.city AS city
     FROM newspaper_2017 AS t1
     INNER JOIN ep_2017 AS t2
     ON ( t1.newspaper_name = t2.pub_companyName
     OR "The " || trim(replace(t1.newspaper_name,'The','')) = t2.pub_companyName
-    OR REPLACE(t1.newspaper_name,"-"," ") = REPLACE(t2.pub_companyName,"-"," ")
+    OR REPLACE(t1.newspaper_name,'-',' ') = REPLACE(t2.pub_companyName,'-',' ')
     OR trim(replace(t1.newspaper_name,'The','')) = t2.pub_companyName)
-    AND (trim(REPLACE(UPPER(t1.city),"CITY","")) = trim(REPLACE(UPPER(t2.Streetaddresscity),"CITY","")))
-    WHERE t1.state = "AZ"
-    ORDER BY newspaper_name ASC''')
+    AND (trim(REPLACE(UPPER(t1.city),'CITY','')) = trim(REPLACE(UPPER(t2.Streetaddresscity),'CITY','')))
+    WHERE t1.state = "%s"
+    ORDER BY newspaper_name ASC''' % (state_str))
+
+    print 'view created'
 
     # merged_papers = defaultdict(dict)
     # for idx, newspaper in enumerate(query_db('SELECT t1.newspaper_name, t2.pub_companyName, t1.city, t2.Streetaddresscity FROM (SELECT * FROM newspaper WHERE state = "' + state_str + '") AS t1 INNER JOIN ep_2017 AS t2 ON (t1.newspaper_name = t2.pub_companyName OR "The " || trim(replace(t1.newspaper_name,"The","")) = t2.pub_companyName) AND (UPPER(t1.city) = UPPER(t2.Streetaddresscity)) ORDER BY t1.newspaper_name ASC')):
