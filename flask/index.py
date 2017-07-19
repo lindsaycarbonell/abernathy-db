@@ -162,18 +162,23 @@ def update_db():
             print 'update city in db...'
             # print query_db('SELECT newspaper_name, city FROM newspaper_2017 WHERE state = "%s" AND newspaper_name = "%s"' % (state, db_oldpaper))
             # print query_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "DB", "%s", "%s", "CITY", "%s")' % (state, db_oldpaper, db_oldcity, db_newcity))
-
             commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "DB", "%s", "%s", "CITY", "%s")' % (state, db_oldpaper, db_oldcity, db_newcity))
 
         if ep_newcity != ep_oldcity:
             print 'update city in ep...'
-            print query_db('SELECT pub_companyName, Streetaddresscity FROM ep_2017 WHERE Streetaddressstate = "%s" AND pub_companyName = "%s"' % (state, ep_oldpaper))
+
+            commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "EP", "%s", "%s", "CITY", "%s")' % (state, ep_oldpaper, ep_oldcity, ep_newcity))
+
         if db_newpaper != db_oldpaper:
             print 'update paper in db...'
-            print query_db('SELECT newspaper_name, city FROM newspaper_2017 WHERE state = "%s" AND newspaper_name = "%s"' % (state, db_oldpaper))
+
+            commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "DB", "%s", "%s", "PAPER", "%s")' % (state, db_oldpaper, db_oldcity, db_newpaper))
+            
         if ep_newpaper != ep_oldpaper:
             print 'update paper in ep...'
             print query_db('SELECT pub_companyName, Streetaddresscity FROM ep_2017 WHERE Streetaddressstate = "%s" AND pub_companyName = "%s"' % (state, ep_oldpaper))
+
+            commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "EP", "%s", "%s", "PAPER", "%s")' % (state, ep_oldpaper, ep_oldcity, ep_newpaper))
 
 
 
