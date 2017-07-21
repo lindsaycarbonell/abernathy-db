@@ -174,7 +174,7 @@ def attempt_merge(state):
     this_state=state
     state_str = [this_state][0].strip("[u'").strip("''")
 
-    query_db('DROP VIEW IF EXISTS merge_attempt')
+    # query_db('DROP VIEW IF EXISTS merge_attempt')
 
     query_db('''CREATE VIEW IF NOT EXISTS merge_attempt AS SELECT t1.newspaper_name AS newspaper_name, t1.city AS city
     FROM newspaper_2017 AS t1

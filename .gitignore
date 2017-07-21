@@ -2,3 +2,5 @@
 newspaper-database/venv_newsp
 flask/venv_flask
 flask/abernathy.db
+flask/abernathy.db.sqbpro
+flask/db/*

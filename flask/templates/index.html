@@ -88,7 +88,7 @@
       <!-- Nav tabs -->
       <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item">
-          <a class="nav-link active" data-toggle="tab" href="#pane_db" role="tab">DB</a>
+          <a class="nav-link active" data-toggle="tab" href="#pane_ep" role="tab">EP</a>
         </li>
         {% if merged_papers %}
         <li class="nav-item">
@@ -96,32 +96,29 @@
         </li>
         {% endif %}
         <li class="nav-item">
-          <a class="nav-link" data-toggle="tab" href="#pane_ep" role="tab">E/P</a>
+          <a class="nav-link" data-toggle="tab" href="#pane_db" role="tab">DB</a>
         </li>
       </ul>
 
 <!-- Tab panes -->
 <div class="tab-content">
 
-    <div id="pane_db" class="tab-pane active {{ 'col-md-6' if merged_papers else 'col-md-6' }}" role="tabpanel">
-      <h2>Database Table</h2>
-      <h3>Total rows: {{db_total}}</h3>
-      <p>This table shows the newspapers in our database for 2017.</p>
-      <table id="db_table" class="state-table table table-bordered">
+  <div id="pane_ep" class="tab-pane col-md-6 active" role="tabpanel">
+      <h2>Editor and Publisher Table</h2>
+      <h3>Total rows: {{ep_total}}</h3>
+      <p>This table shows the newspapers in the E/P database for 2017.</p>
+      <table id="ep_table" class="state-table table table-bordered">
         <thead>
           <tr>
-            <th>newspaper_id</th>
             <th>newspaper_name</th>
             <th>city</th>
           </tr>
         </thead>
-        {% for k,v in state_papers.items()|reverse: %}
-          <tr class="db-row table-row">
+        {% for k,v in ep_papers.items()|reverse: %}
+          <tr class="ep-row table-row">
           {% for key, value in v.items()|reverse: %}
-            {% if key == 'newspaper_id' %}
-              <th scope="row">{{ value }}</th>
-            {% elif key == 'newspaper_name' %}
-              <th class="th-newspaper-name">{{ value }}</th>
+            {% if key == 'newspaper_name' %}
+              <th scope="row" class="th-newspaper-name">{{ value }}</th>
             {% elif key == 'city' %}
               <th class="th-city">{{ value }}</th>
             {% else %}
@@ -163,22 +160,25 @@
     </div><!--./col-->
     {% endif %}
 
-    <div id="pane_ep" class="tab-pane col-md-6" role="tabpanel">
-      <h2>Editor and Publisher Table</h2>
-      <h3>Total rows: {{ep_total}}</h3>
-      <p>This table shows the newspapers in the E/P database for 2017.</p>
-      <table id="ep_table" class="state-table table table-bordered">
+    <div id="pane_db" class="tab-pane {{ 'col-md-6' if merged_papers else 'col-md-6' }}" role="tabpanel">
+      <h2>Database Table</h2>
+      <h3>Total rows: {{db_total}}</h3>
+      <p>This table shows the newspapers in our database for 2017.</p>
+      <table id="db_table" class="state-table table table-bordered">
         <thead>
           <tr>
+            <th>newspaper_id</th>
             <th>newspaper_name</th>
             <th>city</th>
           </tr>
         </thead>
-        {% for k,v in ep_papers.items()|reverse: %}
-          <tr class="ep-row table-row">
+        {% for k,v in state_papers.items()|reverse: %}
+          <tr class="db-row table-row">
           {% for key, value in v.items()|reverse: %}
-            {% if key == 'newspaper_name' %}
-              <th scope="row" class="th-newspaper-name">{{ value }}</th>
+            {% if key == 'newspaper_id' %}
+              <th scope="row">{{ value }}</th>
+            {% elif key == 'newspaper_name' %}
+              <th class="th-newspaper-name">{{ value }}</th>
             {% elif key == 'city' %}
               <th class="th-city">{{ value }}</th>
             {% else %}
@@ -189,6 +189,7 @@
         </tr>
       </table>
     </div><!--./col-->
+
   </div><!-- ./tab-content -->
 </div><!--./col wrapped around tab pane-->
   {% if merged_papers %}
@@ -201,6 +202,7 @@
         <tr>
           <th>newspaper_name</th>
           <th>city</th>
+          <th>HIDE</th>
         </tr>
       </thead>
       {% for k,v in unmerged_papers.items()|reverse: %}
@@ -213,7 +215,9 @@
           {% else %}
             <th>unknown key: {{ value }}</th>
           {% endif %}
+
       {% endfor %}
+          <th class="th-hide">HIDE</th>
       {% endfor %}
       </tr>
     </table>
@@ -261,6 +265,12 @@
             }
 
         });
+
+        $('.th-hide').on('click', function(){
+          // $(this).parent().hide();
+          $('.table-row.selected').hide();
+        });
+
 
         $('#btn_make_merge').click(function(){
           $('.col-form-label').empty();
