@@ -185,7 +185,8 @@ def attempt_merge(state):
     OR trim(replace(t1.newspaper_name,'The','')) = t2.pub_companyName)
     AND (trim(REPLACE(UPPER(t1.city),'CITY','')) = trim(REPLACE(UPPER(t2.Streetaddresscity),'CITY','')))
     WHERE t1.state = "%s"
-    ORDER BY newspaper_name ASC''' % (state_str))
+    AND t2.Streetaddressstate = "%s"
+    ORDER BY newspaper_name ASC''' % (state_str, state_str))
 
 
     return redirect(url_for('get_state_page', state=state))
@@ -218,7 +219,11 @@ def show_merge(state):
     all_merged_papers = defaultdict(dict)
     ## ...and from the merged_papers
     for idx, newspaper in enumerate(query_db('''
-    SELECT t1.newspaper_id AS newspaper_id, t1.newspaper_name AS newspaper_name, t1.frequency AS db_frequency, t1.ep_paid_circ AS ep_paid_circ, t2.db_total_circ AS db_total_circ, t1.ep_free_circ AS ep_free_circ, t1.circDiff AS circDiff, t2.freq_2004 AS freq_2004, t2.total_circulation_2004 AS total_circ_2004, t2.owner_name AS db_owner, t1.ep_owner AS ep_owner, t2.city AS city, t2.county AS county, t1.ep_audit_by AS ep_audit_by, t1.ep_audit_date AS ep_audit_date FROM final_merge AS t1
+    SELECT t1.newspaper_id AS newspaper_id, t1.newspaper_name AS newspaper_name, t1.frequency AS db_frequency,
+    t1.ep_paid_circ AS ep_paid_circ, t2.db_total_circ AS db_total_circ, t1.ep_free_circ AS ep_free_circ,
+    t1.circDiff AS circDiff, t2.freq_2004 AS freq_2004, t2.total_circulation_2004 AS total_circ_2004,
+    t2.owner_name AS db_owner, t1.ep_owner AS ep_owner, t2.city AS city, t2.county AS county, t1.ep_audit_by
+    AS ep_audit_by, t1.ep_audit_date AS ep_audit_date FROM final_merge AS t1
     LEFT JOIN all_2017 AS t2 ON t2.newspaper_id = t1.newspaper_id
     ''')):
         print newspaper['newspaper_id']
