@@ -201,7 +201,7 @@ def show_merge(state):
     query_db('''
     CREATE VIEW final_merge AS
     SELECT newspaper_id, newspaper_name, frequency, AvgPaidCirc AS ep_paid_circ, total_circulation AS db_total_circ, AvgFreeCirc AS ep_free_circ,
-    ABS(CAST(AvgPaidCirc AS INTEGER) - CAST(REPLACE(total_circulation,',','') AS INTEGER)) AS circDiff,
+    ABS((CAST(AvgPaidCirc AS INTEGER) + CAST(AvgFreeCirc AS INTEGER)) - CAST(REPLACE(total_circulation,',','') AS INTEGER)) AS circDiff,
     AuditBy AS ep_audit_by, AuditDate AS ep_audit_date, ParentCompany AS ep_owner,
     t1.city AS city, t1.county AS county FROM newspaper_2017 AS t1
     LEFT OUTER JOIN ep_2017 AS t2 ON
