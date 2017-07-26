@@ -212,8 +212,9 @@ def show_merge(state):
     ( trim(REPLACE(UPPER(t1.city),"CITY","")) = trim(REPLACE(UPPER(t2.Streetaddresscity),"CITY",""))
     )
     WHERE t1.state = "%s"
+    AND t2.Streetaddressstate = "%s"
     ORDER BY newspaper_name ASC
-    ''' % (state_str))
+    ''' % (state_str, state_str))
 
 
     all_merged_papers = defaultdict(dict)
