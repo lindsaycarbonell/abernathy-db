@@ -66,7 +66,7 @@
                 <div class="col-sm-6">
 
                   <label for="inputDbSelCity" class="col-sm-6 col-form-label"></label>
-                  <input class="form-control" id="inputDbSelCity" name="inputDbSelCity" placeholder="Type new DB city name here.">
+                  <input class="form-control" id="inputDbSelCity" name="inputDbSelCity" placeholder="Type new DB city name here." onblur="this.value=this.value.toTitleCase()">
                   <input type="hidden" id="oldDbCity" name="oldDbCity">
                 </div>
               </div>
@@ -291,6 +291,12 @@
 
 
         });
+
+        String.prototype.toTitleCase = function(n) {
+           var s = this;
+           if (1 !== n) s = s.toLowerCase();
+           return s.replace(/(^|\s)[a-z]/g,function(f){return f.toUpperCase()});
+        }
 
 
       });
