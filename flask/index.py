@@ -198,13 +198,20 @@ def show_merge(state):
 
     query_db('DROP VIEW IF EXISTS final_merge')
 
+    query_db('DROP VIEW ep_%s' % (state_str))
+
+    query_db('''CREATE VIEW ep_%s AS
+    SELECT * FROM ep_2017
+    WHERE Streetaddressstate = "%s"
+    ''' % (state_str, state_str))
+
     query_db('''
     CREATE VIEW final_merge AS
     SELECT newspaper_id, newspaper_name, frequency, AvgPaidCirc AS ep_paid_circ, total_circulation AS db_total_circ, AvgFreeCirc AS ep_free_circ,
     ABS((CAST(AvgPaidCirc AS INTEGER) + CAST(AvgFreeCirc AS INTEGER)) - CAST(REPLACE(total_circulation,',','') AS INTEGER)) AS circDiff,
     AuditBy AS ep_audit_by, AuditDate AS ep_audit_date, ParentCompany AS ep_owner,
     t1.city AS city, t1.county AS county FROM newspaper_2017 AS t1
-    LEFT OUTER JOIN ep_2017 AS t2 ON
+    LEFT OUTER JOIN ep_%s AS t2 ON
     ( t1.newspaper_name = t2.pub_companyName
     OR "The " || trim(replace(t1.newspaper_name,'The','')) = t2.pub_companyName
     OR  REPLACE(t1.newspaper_name,"-"," ") = REPLACE(t2.pub_companyName,"-"," ")
@@ -212,7 +219,6 @@ def show_merge(state):
     ( trim(REPLACE(UPPER(t1.city),"CITY","")) = trim(REPLACE(UPPER(t2.Streetaddresscity),"CITY",""))
     )
     WHERE t1.state = "%s"
-    AND t2.Streetaddressstate = "%s"
     ORDER BY newspaper_name ASC
     ''' % (state_str, state_str))
 
