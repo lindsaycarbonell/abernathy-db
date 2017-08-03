@@ -1,5 +1,7 @@
 from flask import Flask, url_for, request, g, redirect, flash, session
 from flask import render_template
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 app = Flask(__name__)
 
 app.secret_key = '8XGO8DVb65__2MTi5yssLX'
@@ -69,7 +71,7 @@ def get_state_page(state):
 
     ## ...and get it from EP too
     ep_papers = defaultdict(dict)
-    for idx, newspaper in enumerate(query_db('SELECT * FROM ep_2017 WHERE Streetaddressstate = ?', [this_state])):
+    for idx, newspaper in enumerate(query_db('SELECT * FROM ep_2017 WHERE Streetaddressstate = ? AND ep_id NOT IN (SELECT ep_id FROM merge_attempt)', [this_state])):
         ep_papers[idx]['newspaper_name'] = newspaper['pub_companyName']
         ep_papers[idx]['city'] = newspaper['Streetaddresscity']
 
@@ -86,6 +88,7 @@ def get_state_page(state):
     if merge_exists:
         merged_papers = defaultdict(dict)
         unmerged_papers = defaultdict(dict)
+        unmerged_ep = defaultdict(dict)
         ## ...and from the merged_papers
         for idx, newspaper in enumerate(query_db('SELECT * FROM merge_attempt ORDER BY newspaper_name ASC')):
             # print newspaper['newspaper_name']
@@ -97,8 +100,19 @@ def get_state_page(state):
             unmerged_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
             unmerged_papers[idx]['city'] = newspaper['city']
 
+        # print this_state
+        #
+        # for idx, newspaper in enumerate(query_db('SELECT pub_companyName AS newspaper_name, Streetaddresscity AS city FROM ep_TN WHERE ep_id NOT IN (SELECT ep_id FROM merge_attempt)')):
+        #     print 'running'
+        #     print newspaper['ep_id']
+        #     unmerged_ep[idx]['ep_id'] = newspaper['ep_id']
+        #     unmerged_ep[idx]['newspaper_name'] = newspaper['newspaper_name']
+        #     unmerged_ep[idx]['city'] = newspaper['city']
+
+
         unmerged_total = len(unmerged_papers)
         merged_total = len(merged_papers)
+        # ep_unmerged_total = len(unmerged_ep)
 
         # print unmerged_total
 
@@ -188,17 +202,17 @@ def attempt_merge(state):
     # print this_state
     state_str = [this_state][0].strip("[u'").strip("''")
 
-    # query_db('DROP VIEW IF EXISTS merge_attempt')
-    query_db('DROP VIEW IF EXISTS ep_%s' % (state_str))
+    query_db('DROP VIEW IF EXISTS merge_attempt')
+    # query_db('DROP VIEW IF EXISTS ep_%s' % (state_str))
 
-    query_db('''CREATE VIEW ep_%s AS
+    query_db('''CREATE VIEW IF NOT EXISTS ep_%s AS
     SELECT * FROM ep_2017
     WHERE Streetaddressstate = "%s"
     ''' % (state_str, state_str))
 
     # print query_db('SELECT * FROM ep_%s' % (state_str))
 
-    query_db('''CREATE VIEW IF NOT EXISTS merge_attempt AS SELECT t1.newspaper_name AS newspaper_name, t1.city AS city
+    query_db('''CREATE VIEW IF NOT EXISTS merge_attempt AS SELECT t2.ep_id AS ep_id, t1.newspaper_id AS db_id, t1.newspaper_name AS newspaper_name, t1.city AS city
     FROM newspaper_2017 AS t1
     INNER JOIN ep_%s AS t2
     ON ( t1.newspaper_name = t2.pub_companyName
