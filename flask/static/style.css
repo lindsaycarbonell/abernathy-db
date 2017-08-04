@@ -1,5 +1,8 @@
 /*https://color.adobe.com/Home-color-theme-9762877*/
-
+body{
+  font-size:1.2em;
+  font-family:'Verdana', 'sans-serif';
+}
 th:hover{
   cursor:pointer;
 }
@@ -19,4 +22,29 @@ th:hover{
   flex-direction:column;
   justify-content: center;
   height:100vh;
+}
+
+#btn-wrapper{
+  position:fixed;
+  display:flex;
+  flex-direction:column;
+  justify-content: center;
+  align-items: flex-end;
+  left:87vw;
+  height:100vh;
+    /*z-index:1000;*/
+}
+
+#btn-wrapper a{
+  display:block;
+  margin:10px;
+}
+
+#overlay-b{
+  height:100%;
+  width:100vw;
+  position:fixed;
+  z-index:-1000;
+  background-color:pink;
+  opacity:.3;
 }

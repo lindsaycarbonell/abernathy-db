@@ -19,25 +19,47 @@
 
   </head>
   <body>
+
+      <div style="position:relative;">
+        <div id="btn-wrapper">
+          <a href="/{{state}}/merge/">
+            <button class="btn btn-primary btn-large">Merge tables</button>
+          </a>
+          <a id="btn_make_merge" data-toggle="modal" data-target=".bd-example-modal-lg">
+            <button class="btn btn-primary btn-large">Make match</button>
+          </a>
+          <a href="/{{state}}/show_merge/">
+            <button class="btn btn-primary btn-large">Get final table</button>
+          </a>
+          <a href="/select/">
+            <button class="btn btn-primary btn-large">Select another state</button>
+          </a>
+          <a href="#top">Back to top</a>
+        </div>
+      </div>
+
   <div class="container-fluid">
 
+  <a name="top"></a>
 
 
   {% if state %}
+
   <header class="row idx-header">
-    <div class="col-12 justify-content-center">
-      <h1 id="state-title">{{state}}</h1>
-      {% if merged_total %}
-      <h3><span>{{ db_total-merged_total }}</span> papers left to check and <span></span> papers with no matches.</h3>
-      {% endif %}
+    <div class="container">
+      <div class="col-md-12">
+
+        <h1 id="state-title">{{full_state}}</h1>
+        {% if merged_total %}
+        <h3><span>{{ db_total-merged_total }}</span> papers left to check and <span></span> papers with no matches.</h3>
+        {% endif %}
+      </div>
     </div>
   </header>
+</div>
 
 
-    <a href="/select/">Select another state</a>
-    <a href="/{{state}}/merge/">Attempt merge</a>
-    <a href="/{{state}}/show_merge/">Get final table</a>
-    <a id="btn_make_merge" data-toggle="modal" data-target=".bd-example-modal-lg">These rows are the same</a>
+
     <!-- <a id="btn_make_merge_city" data-toggle="modal" data-target=".bd-example-modal-lg">These rows are the same ON CITY</a> -->
 
     <div class="modal fade bd-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
@@ -86,6 +108,20 @@
   </div>
 
 
+
+<div class="container">
+
+  <!-- <div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8" style="display:flex;justify-content:space-around;margin-top:20px;">
+      <a href="/{{state}}/merge/"><button class="btn btn-primary btn-large">Merge tables</button></a>
+      <a id="btn_make_merge" data-toggle="modal" data-target=".bd-example-modal-lg"><a href="/select/"><button class="btn btn-primary btn-large">Make match</button></a></a>
+      <a href="/{{state}}/show_merge/"><button class="btn btn-primary btn-large">Get final table</button></a>
+      <a href="/select/"><button class="btn btn-primary btn-large">Select another state</button></a>
+    </div>
+    <div class="col-md-2"></div>
+  </div> -->
+
   <div class="row">
     <div class="col-md-6">
       <!-- Nav tabs -->
@@ -106,7 +142,7 @@
 <!-- Tab panes -->
 <div class="tab-content">
 
-  <div id="pane_ep" class="tab-pane col-md-6 active" role="tabpanel">
+  <div id="pane_ep" class="tab-pane col-md-12 active" role="tabpanel">
       <h2>Unmerged Editor and Publisher Table</h2>
       <h3>Total rows: {{ep_total}}</h3>
       <p>This table shows the newspapers in the E/P database for 2017 that didn't merge with the database.</p>
@@ -121,11 +157,9 @@
           <tr class="ep-row table-row">
           {% for key, value in v.items()|reverse: %}
             {% if key == 'newspaper_name' %}
-              <th scope="row" class="th-newspaper-name">{{ value }}</th>
+              <td scope="row" class="td-newspaper-name">{{ value }}</td>
             {% elif key == 'city' %}
-              <th class="th-city">{{ value }}</th>
-            {% else %}
-              <th>unknown key: {{ value }}</th>
+              <td class="td-city">{{ value }}</td>
             {% endif %}
         {% endfor %}
         {% endfor %}
@@ -135,7 +169,7 @@
 
     {% if merged_papers %}
 
-    <div id="pane_merged" class="tab-pane col-md-6" role="tabpanel">
+    <div id="pane_merged" class="tab-pane col-md-12" role="tabpanel">
       <h2>Merged with E/P Table</h2>
       <h3>Total rows: {{merged_total}}</h3>
       <p>This table shows successful merges with E/P and our database.</p>
@@ -150,11 +184,9 @@
           <tr class="merged-row table-row">
           {% for key, value in v.items()|reverse: %}
             {% if key == 'newspaper_name' %}
-              <th scope="row" class="th-newspaper-name">{{ value }}</th>
+              <td scope="row" class="td-newspaper-name">{{ value }}</td>
             {% elif key == 'city' %}
-              <th class="th-city">{{ value }}</th>
-            {% else %}
-              <th>unknown key: {{ value }}</th>
+              <td class="td-city">{{ value }}</td>
             {% endif %}
         {% endfor %}
         {% endfor %}
@@ -163,14 +195,14 @@
     </div><!--./col-->
     {% endif %}
 
-    <div id="pane_db" class="tab-pane {{ 'col-md-6' if merged_papers else 'col-md-6' }}" role="tabpanel">
+    <div id="pane_db" class="tab-pane col-md-12" role="tabpanel">
       <h2>Database Table</h2>
       <h3>Total rows: {{db_total}}</h3>
       <p>This table shows the newspapers in our database for 2017.</p>
       <table id="db_table" class="state-table table table-bordered">
         <thead>
           <tr>
-            <th>newspaper_id</th>
+            <!-- <th>newspaper_id</th> -->
             <th>newspaper_name</th>
             <th>city</th>
           </tr>
@@ -178,14 +210,10 @@
         {% for k,v in state_papers.items()|reverse: %}
           <tr class="db-row table-row">
           {% for key, value in v.items()|reverse: %}
-            {% if key == 'newspaper_id' %}
-              <th scope="row">{{ value }}</th>
-            {% elif key == 'newspaper_name' %}
-              <th class="th-newspaper-name">{{ value }}</th>
+            {% if key == 'newspaper_name' %}
+              <td class="td-newspaper-name">{{ value }}</td>
             {% elif key == 'city' %}
-              <th class="th-city">{{ value }}</th>
-            {% else %}
-              <th>unknown key: {{ value }}</th>
+              <td class="td-city">{{ value }}</td>
             {% endif %}
         {% endfor %}
         {% endfor %}
@@ -197,7 +225,7 @@
 </div><!--./col wrapped around tab pane-->
   {% if merged_papers %}
   <div class="col-md-6">
-    <h2>Unmerged Table</h2>
+    <h2 style="margin-top:61px;">Unmerged Table</h2>
     <h3>Total rows: {{unmerged_total}}</h3>
     <p>This table shows rows from our database that have not merged with E/P.</p>
     <table id="unmerged_table" class="state-table table table-bordered">
@@ -212,15 +240,13 @@
         <tr class="unmerged-row table-row">
         {% for key, value in v.items()|reverse: %}
           {% if key == 'newspaper_name' %}
-            <th scope="row" class="th-newspaper-name">{{ value }}</th>
+            <td scope="row" class="td-newspaper-name">{{ value }}</td>
           {% elif key == 'city' %}
-            <th class="th-city">{{ value }}</th>
-          {% else %}
-            <th>unknown key: {{ value }}</th>
+            <td class="td-city">{{ value }}</td>
           {% endif %}
 
       {% endfor %}
-          <th class="th-hide">HIDE</th>
+          <td class="td-hide">HIDE</td>
       {% endfor %}
       </tr>
     </table>
@@ -229,7 +255,9 @@
   {% else %}
     <a href="/select">Select a state</a>
   {% endif %}
+</div><!--/.row-->
 </div><!--/.container-->
+</div><!--/.container-fluid-->
     <!-- jQuery first, then Tether, then Bootstrap JS. -->
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
@@ -260,17 +288,17 @@
 
         $('.table-row').click(function(){
             if ($(this).hasClass('unmerged-row')){
-              sel_db_name = $(this).find('.th-newspaper-name').html();
-              sel_db_city = $(this).find('.th-city').html();
+              sel_db_name = $(this).find('.td-newspaper-name').html();
+              sel_db_city = $(this).find('.td-city').html();
             }
             else if ($(this).hasClass('ep-row')){
-              sel_ep_name = $(this).find('.th-newspaper-name').html();
-              sel_ep_city = $(this).find('.th-city').html();
+              sel_ep_name = $(this).find('.td-newspaper-name').html();
+              sel_ep_city = $(this).find('.td-city').html();
             }
 
         });
 
-        $('.th-hide').on('click', function(){
+        $('.td-hide').on('click', function(){
           // $(this).parent().hide();
           $('.table-row.selected').hide();
         });
