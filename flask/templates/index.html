@@ -23,14 +23,16 @@
       <div style="position:relative;">
         <div id="btn-wrapper">
           <a href="/{{state}}/merge/">
-            <button class="btn btn-primary btn-large">Merge tables</button>
+            <button class="btn btn-primary btn-large">Attempt merge with E/P</button>
           </a>
+          {% if merged_papers %}
           <a id="btn_make_merge" class="btn btn-primary btn-large" data-toggle="modal" data-target=".bd-example-modal-lg">
             Make match
           </a>
           <a href="/{{state}}/show_merge/">
             <button class="btn btn-primary btn-large">Get final table</button>
           </a>
+          {% endif %}
           <a href="/select/">
             <button class="btn btn-primary btn-large">Select another state</button>
           </a>
@@ -47,7 +49,7 @@
 
   <header class="row idx-header">
     <div class="container">
-      <div class="col-md-12">
+      <div id="title-wrapper" class="col-md-12">
 
         <h1 id="state-title">{{full_state}}</h1>
       </div>
@@ -120,26 +122,28 @@
   </div> -->
 
   <div class="row">
-    <div class="col-md-6">
+    <div class="{{ 'col-md-6' if merged_papers else 'col-md-12' }}">
       <!-- Nav tabs -->
       <ul class="nav nav-tabs" role="tablist">
-        <li class="nav-item">
-          <a class="nav-link active" data-toggle="tab" href="#pane_ep" role="tab">EP</a>
-        </li>
         {% if merged_papers %}
+        <li class="nav-item active">
+          <a class="nav-link" data-toggle="tab" href="#pane_ep" role="tab">EP</a>
+        </li>
         <li class="nav-item">
           <a class="nav-link" data-toggle="tab" href="#pane_merged" role="tab">Merged</a>
         </li>
-        {% endif %}
         <li class="nav-item">
           <a class="nav-link" data-toggle="tab" href="#pane_db" role="tab">DB</a>
         </li>
+        {% endif %}
+
       </ul>
 
 <!-- Tab panes -->
 <div class="tab-content">
 
-  <div id="pane_ep" class="tab-pane col-md-12 active" role="tabpanel">
+{% if ep_papers %}
+  <div id="pane_ep" class="tab-pane col-md-12" role="tabpanel">
       <h2>Unmerged Editor and Publisher Table</h2>
       <h3>Total rows: {{ep_total}}</h3>
       <p>This table shows the newspapers in the E/P database for 2017 that didn't merge with the database.</p>
@@ -163,6 +167,7 @@
         </tr>
       </table>
     </div><!--./col-->
+  {% endif %}
 
     {% if merged_papers %}
 
@@ -192,7 +197,7 @@
     </div><!--./col-->
     {% endif %}
 
-    <div id="pane_db" class="tab-pane col-md-12" role="tabpanel">
+    <div id="pane_db" class="tab-pane col-md-12 active" role="tabpanel">
       <h2>Database Table</h2>
       <h3>Total rows: {{db_total}}</h3>
       <p>This table shows the newspapers in our database for 2017.</p>
@@ -267,9 +272,18 @@
     <script type="text/javascript" src="https://cdn.datatables.net/v/bs/jq-2.2.4/jszip-3.1.3/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/b-print-1.3.1/cr-1.3.3/fh-3.1.2/se-1.2.2/datatables.min.js"></script>
 
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.3.1/js/dataTables.buttons.min.js"></script>
-
+    <script type="text/javascript" src="/static/randomColor.js"></script>
     <script>
       $(document).ready(function(){
+
+        //generate fun colors
+        var mainColor = randomColor();
+        var supportingColor = randomColor();
+
+        $('#state-title').css('color', mainColor);
+        $('#state-title').css('border-color', supportingColor);
+        $('.btn-primary').css('background-color', mainColor);
+        $('.btn-primary').css('border-color', supportingColor);
 
         var sel_unmerge;
         var sel_ep;
@@ -285,7 +299,8 @@
           select:true
         });
 
-        $('.table-row').click(function(){
+        $('.table-row').on('click', function(){
+          // $('.selected').css('background-color', mainColor);
             if ($(this).hasClass('unmerged-row')){
               sel_db_name = $(this).find('.td-newspaper-name').html();
               sel_db_city = $(this).find('.td-city').html();
@@ -294,6 +309,8 @@
               sel_ep_name = $(this).find('.td-newspaper-name').html();
               sel_ep_city = $(this).find('.td-city').html();
             }
+
+
 
         });
 

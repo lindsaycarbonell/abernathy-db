@@ -7,14 +7,29 @@ th:hover{
   cursor:pointer;
 }
 
-.idx-header{
+/*.idx-header{
   background-color:#776666;
   color:white;
-}
+}*/
 .idx-header h3 span{
   font-size:26pt;
 
   color:#7BA5B8;
+}
+
+#state-title{
+  text-align: center;
+  border: 5px solid darkkhaki;
+  display: inline-flex;
+  border-radius: 4px;
+  font-family: 'Menlo';
+  padding: 10px;
+  color: firebrick;
+}
+
+#title-wrapper{
+  justify-content: center;
+  display: flex;
 }
 
 .page-center-cont{

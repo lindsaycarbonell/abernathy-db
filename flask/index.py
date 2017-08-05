@@ -130,15 +130,11 @@ def get_state_page(state):
         state_papers[idx]['newspaper_name'] = newspaper['newspaper_name']
         state_papers[idx]['city'] = newspaper['city']
 
-    ## ...and get it from EP too
-    ep_papers = defaultdict(dict)
-    for idx, newspaper in enumerate(query_db('SELECT * FROM ep_2017 WHERE Streetaddressstate = ? AND ep_id NOT IN (SELECT ep_id FROM merge_attempt)', [this_state])):
-        ep_papers[idx]['newspaper_name'] = newspaper['pub_companyName']
-        ep_papers[idx]['city'] = newspaper['Streetaddresscity']
+
 
     ## get counts
     db_total = len(state_papers)
-    ep_total = len(ep_papers)
+
 
     try:
         query_db('SELECT 1 FROM merge_attempt LIMIT 1;')
@@ -150,6 +146,15 @@ def get_state_page(state):
         merged_papers = defaultdict(dict)
         unmerged_papers = defaultdict(dict)
         unmerged_ep = defaultdict(dict)
+        ep_papers = defaultdict(dict)
+
+        # ... and from ep papers
+        for idx, newspaper in enumerate(query_db('SELECT * FROM ep_2017 WHERE Streetaddressstate = ? AND ep_id NOT IN (SELECT ep_id FROM merge_attempt)', [this_state])):
+            ep_papers[idx]['newspaper_name'] = newspaper['pub_companyName']
+            ep_papers[idx]['city'] = newspaper['Streetaddresscity']
+
+        ep_total = len(ep_papers)
+
         ## ...and from the merged_papers
         for idx, newspaper in enumerate(query_db('SELECT * FROM merge_attempt ORDER BY newspaper_name ASC')):
             # print newspaper['newspaper_name']
@@ -180,9 +185,9 @@ def get_state_page(state):
 
         # print unmerged_total
 
-        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total, merged_papers=merged_papers, merged_total=merged_total, unmerged_papers=unmerged_papers, unmerged_total=unmerged_total, is_duplicate=is_duplicate, num_of_dupl=num_of_dupl, full_state=full_states[state])
+        return render_template('index.html', cssurl=css_url, states=states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total, merged_papers=merged_papers, merged_total=merged_total, unmerged_papers=unmerged_papers, unmerged_total=unmerged_total, is_duplicate=is_duplicate, num_of_dupl=num_of_dupl, full_state=full_states[state])
     else:
-        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total, full_state=full_states[state])
+        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, state=state, db_total=db_total, full_state=full_states[state])
 
 
 
@@ -190,6 +195,7 @@ def get_state_page(state):
 @app.route('/select/', methods=['POST', 'GET'])
 def get_state():
     css_url = url_for('static', filename='style.css')
+    query_db('DROP VIEW IF EXISTS merge_attempt')
     if request.method == 'POST':
         state=request.form['state']
         return redirect(url_for('/', state=state))
