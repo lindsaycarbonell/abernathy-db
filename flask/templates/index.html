@@ -25,8 +25,8 @@
           <a href="/{{state}}/merge/">
             <button class="btn btn-primary btn-large">Merge tables</button>
           </a>
-          <a id="btn_make_merge" data-toggle="modal" data-target=".bd-example-modal-lg">
-            <button class="btn btn-primary btn-large">Make match</button>
+          <a id="btn_make_merge" class="btn btn-primary btn-large" data-toggle="modal" data-target=".bd-example-modal-lg">
+            Make match
           </a>
           <a href="/{{state}}/show_merge/">
             <button class="btn btn-primary btn-large">Get final table</button>
@@ -50,9 +50,6 @@
       <div class="col-md-12">
 
         <h1 id="state-title">{{full_state}}</h1>
-        {% if merged_total %}
-        <h3><span>{{ db_total-merged_total }}</span> papers left to check and <span></span> papers with no matches.</h3>
-        {% endif %}
       </div>
     </div>
   </header>
@@ -66,13 +63,13 @@
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            <h5 class="modal-title" id="exampleModalLabel">Adjust fields to match records</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
         <div class="modal-body">
-          <div class="container">
+          <div class="container-fluid">
             <form class="row" method="POST" action="{{url_for('update_db', state=state)}}">
               <div class="form-group col-sm-6">
                 <label for="inputEpSelPaper" class="col-sm-6 col-form-label"></label>
@@ -228,6 +225,7 @@
     <h2 style="margin-top:61px;">Unmerged Table</h2>
     <h3>Total rows: {{unmerged_total}}</h3>
     <p>This table shows rows from our database that have not merged with E/P.</p>
+    <p>{% if is_duplicate %} <span class="warn">WARNING:</span> There are <span style="font-weight:bold;">{{ num_of_dupl }}</span> duplicate entries for this state. {% endif %}</p>
     <table id="unmerged_table" class="state-table table table-bordered">
       <thead>
         <tr>
@@ -262,7 +260,8 @@
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
   <script src="https://use.fontawesome.com/f45262afc0.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script> -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
     <!-- DataTables -->
     <script type="text/javascript" src="https://cdn.datatables.net/v/bs/jq-2.2.4/jszip-3.1.3/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/b-print-1.3.1/cr-1.3.3/fh-3.1.2/se-1.2.2/datatables.min.js"></script>

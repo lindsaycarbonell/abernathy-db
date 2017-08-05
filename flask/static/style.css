@@ -48,3 +48,8 @@ th:hover{
   background-color:pink;
   opacity:.3;
 }
+
+.warn{
+  font-weight:bold;
+  color:red;
+}

@@ -122,6 +122,8 @@ def get_state_page(state):
     print 'GET STATE PAGE'
     css_url = url_for('static', filename='style.css')
     this_state=state
+    is_duplicate=False
+    num_of_dupl=0
     state_papers = defaultdict(dict)
     for idx, newspaper in enumerate(query_db('select * from newspaper where state = ?', [this_state])):
         state_papers[idx]['newspaper_id'] = newspaper['newspaper_id']
@@ -171,11 +173,14 @@ def get_state_page(state):
 
         unmerged_total = len(unmerged_papers)
         merged_total = len(merged_papers)
+        if db_total-merged_total != unmerged_total:
+            is_duplicate = True
+            num_of_dupl = abs((db_total-merged_total)-unmerged_total)
         # ep_unmerged_total = len(unmerged_ep)
 
         # print unmerged_total
 
-        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total, merged_papers=merged_papers, merged_total=merged_total, unmerged_papers=unmerged_papers, unmerged_total=unmerged_total, full_state=full_states[state])
+        return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total, merged_papers=merged_papers, merged_total=merged_total, unmerged_papers=unmerged_papers, unmerged_total=unmerged_total, is_duplicate=is_duplicate, num_of_dupl=num_of_dupl, full_state=full_states[state])
     else:
         return render_template('index.html', cssurl = css_url, states = states, state_papers=state_papers, ep_papers=ep_papers, state=state, db_total=db_total, ep_total=ep_total, full_state=full_states[state])
 
