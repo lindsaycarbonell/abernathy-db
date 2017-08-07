@@ -16,7 +16,6 @@ with app.app_context():
         'AK': 'Alaska',
         'AL': 'Alabama',
         'AR': 'Arkansas',
-        'AS': 'American Samoa',
         'AZ': 'Arizona',
         'CA': 'California',
         'CO': 'Colorado',
@@ -25,7 +24,6 @@ with app.app_context():
         'DE': 'Delaware',
         'FL': 'Florida',
         'GA': 'Georgia',
-        'GU': 'Guam',
         'HI': 'Hawaii',
         'IA': 'Iowa',
         'ID': 'Idaho',
@@ -40,10 +38,8 @@ with app.app_context():
         'MI': 'Michigan',
         'MN': 'Minnesota',
         'MO': 'Missouri',
-        'MP': 'Northern Mariana Islands',
         'MS': 'Mississippi',
         'MT': 'Montana',
-        'NA': 'National',
         'NC': 'North Carolina',
         'ND': 'North Dakota',
         'NE': 'Nebraska',
@@ -56,7 +52,6 @@ with app.app_context():
         'OK': 'Oklahoma',
         'OR': 'Oregon',
         'PA': 'Pennsylvania',
-        'PR': 'Puerto Rico',
         'RI': 'Rhode Island',
         'SC': 'South Carolina',
         'SD': 'South Dakota',
@@ -64,7 +59,6 @@ with app.app_context():
         'TX': 'Texas',
         'UT': 'Utah',
         'VA': 'Virginia',
-        'VI': 'Virgin Islands',
         'VT': 'Vermont',
         'WA': 'Washington',
         'WI': 'Wisconsin',
@@ -303,16 +297,16 @@ def show_merge(state):
 
     query_db('DROP VIEW IF EXISTS final_merge')
 
-    query_db('DROP VIEW IF EXISTS ep_%s' % (state_str))
+    # query_db('DROP VIEW IF EXISTS ep_%s' % (state_str))
 
-    query_db('''CREATE VIEW ep_%s AS
+    query_db('''CREATE VIEW IF NOT EXISTS ep_%s AS
     SELECT * FROM ep_2017
     WHERE Streetaddressstate = "%s"
     ''' % (state_str, state_str))
 
     query_db('''
     CREATE VIEW final_merge AS
-    SELECT newspaper_id, newspaper_name, frequency, AvgPaidCirc AS ep_paid_circ, total_circulation AS db_total_circ, AvgFreeCirc AS ep_free_circ,
+    SELECT state, newspaper_id, newspaper_name, frequency, AvgPaidCirc AS ep_paid_circ, total_circulation AS db_total_circ, AvgFreeCirc AS ep_free_circ,
     ABS((CAST(AvgPaidCirc AS INTEGER) + CAST(AvgFreeCirc AS INTEGER)) - CAST(REPLACE(total_circulation,',','') AS INTEGER)) AS circDiff,
     AuditBy AS ep_audit_by, AuditDate AS ep_audit_date, ParentCompany AS ep_owner,
     t2.pub_companyName AS ep_newspaper_name,
