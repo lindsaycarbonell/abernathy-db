@@ -144,9 +144,10 @@
 
 {% if ep_papers %}
   <div id="pane_ep" class="tab-pane col-md-12 active" role="tabpanel">
-      <h2>Unmerged Editor and Publisher Table</h2>
+      <h2>Unmerged E/P Table</h2>
       <h3>Total rows: {{ep_total}}</h3>
-      <p>This table shows the newspapers in the E/P database for 2017 that didn't merge with the database.</p>
+      <p>This table shows the 2017 E/P newspapers that didn't merge.</p>
+      <p style="visibility: hidden;">WARNING PLACEHOLDER</p>
       <table id="ep_table" class="state-table table table-bordered">
         <thead>
           <tr>
@@ -175,6 +176,7 @@
       <h2>Merged with E/P Table</h2>
       <h3>Total rows: {{merged_total}}</h3>
       <p>This table shows successful merges with E/P and our database.</p>
+      <p style="visibility: hidden;">WARNING PLACEHOLDER</p>
       <table id="merged_table" class="state-table table table-bordered">
         <thead>
           <tr>
@@ -201,6 +203,7 @@
       <h2>Database Table</h2>
       <h3>Total rows: {{db_total}}</h3>
       <p>This table shows the newspapers in our database for 2017.</p>
+      <p style="visibility: hidden;">WARNING PLACEHOLDER</p>
       <table id="db_table" class="state-table table table-bordered">
         <thead>
           <tr>
@@ -230,13 +233,19 @@
     <h2 style="margin-top:61px;">Unmerged Table</h2>
     <h3>Total rows: {{unmerged_total}}</h3>
     <p>This table shows rows from our database that have not merged with E/P.</p>
-    <p>{% if is_duplicate %} <span class="warn">WARNING:</span> There are <span style="font-weight:bold;">{{ num_of_dupl }}</span> duplicate entries for this state. {% endif %}</p>
+    {% if is_duplicate %}
+    <p><span class="warn">WARNING:</span> There are <span style="font-weight:bold;">{{ num_of_dupl }}</span> duplicate entries for this state.</p>
+    {% else %}
+    <p style="visibility: hidden;">WARNING PLACEHOLDER</p>
+    {% endif %}
+
+
     <table id="unmerged_table" class="state-table table table-bordered">
       <thead>
         <tr>
           <th>newspaper_name</th>
           <th>city</th>
-          <th>HIDE</th>
+          <!-- <th>HIDE</th> -->
         </tr>
       </thead>
       {% for k,v in unmerged_papers.items()|reverse: %}
@@ -249,7 +258,7 @@
           {% endif %}
 
       {% endfor %}
-          <td class="td-hide">HIDE</td>
+          <!-- <td class="td-hide">HIDE</td> -->
       {% endfor %}
       </tr>
     </table>

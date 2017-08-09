@@ -220,33 +220,33 @@ def update_db():
         ep_newpaper=request.form['inputEpSelPaper']
         ep_oldpaper=request.form['oldEpPaper']
 
-        if db_oldpaper == ep_oldpaper:
-            print 'we just need to update city...'
-            print 'the city for ep was: ' + ep_oldcity
-            print 'now for db it is: ' + ep_oldcity.title()
+        # if db_oldpaper == ep_oldpaper:
+        #     print 'we just need to update city...'
+        #     print 'the city for ep was: ' + ep_oldcity
+        #     print 'now for db it is: ' + ep_oldcity.title()
+        #
+        #     commit_db('UPDATE newspaper SET city = "%s" WHERE state = "%s" AND newspaper_name = "%s"' % (ep_oldcity.title(), state, db_oldpaper))
+        #     commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "DB", "%s", "%s", "CITY", "%s")' % (state, db_oldpaper, db_oldcity, ep_oldcity.title()))
 
-            commit_db('UPDATE newspaper SET city = "%s" WHERE state = "%s" AND newspaper_name = "%s"' % (ep_oldcity.title(), state, db_oldpaper))
-            commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "DB", "%s", "%s", "CITY", "%s")' % (state, db_oldpaper, db_oldcity, ep_oldcity.title()))
-
-        elif db_newcity != db_oldcity:
+        if db_newcity != db_oldcity:
             print 'update city in db...'
 
             commit_db('UPDATE newspaper SET city = "%s" WHERE state = "%s" AND newspaper_name = "%s"' % (db_newcity, state, db_oldpaper))
             commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "DB", "%s", "%s", "CITY", "%s")' % (state, db_oldpaper, db_oldcity, db_newcity))
 
-        elif ep_newcity != ep_oldcity:
+        if ep_newcity != ep_oldcity:
             print 'update city in ep...'
 
             commit_db('UPDATE ep_2017 SET Streetaddresscity = "%s" WHERE Streetaddressstate = "%s" AND pub_companyName = "%s"' % (ep_newcity, state, ep_oldpaper))
             commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "EP", "%s", "%s", "CITY", "%s")' % (state, ep_oldpaper, ep_oldcity, ep_newcity))
 
-        elif db_newpaper != db_oldpaper:
+        if db_newpaper != db_oldpaper:
             print 'update paper in db...'
 
             commit_db('UPDATE newspaper SET newspaper_name = "%s" WHERE state = "%s" AND newspaper_name = "%s"' % (db_newpaper, state, db_oldpaper))
             commit_db('INSERT INTO overall_merge_changes (state, db_changed, old_paper, old_city, column_changed, changed_to) VALUES ("%s", "DB", "%s", "%s", "PAPER", "%s")' % (state, db_oldpaper, db_oldcity, db_newpaper))
 
-        elif ep_newpaper != ep_oldpaper:
+        if ep_newpaper != ep_oldpaper:
             print 'update paper in ep...'
 
             commit_db('UPDATE ep_2017 SET pub_companyName = "%s" WHERE Streetaddressstate = "%s" AND pub_companyName = "%s"' % (ep_newpaper, state, ep_oldpaper))

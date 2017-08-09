@@ -16,7 +16,6 @@ This application is solely for facilitating the merge between Editor & Publisher
 - Make ampersands show up correctly
 - Add the "clear" command to the UI
 - Have a giant arrow that points to the "Attempt merge" when you come to a new state
-- Align tables on the top
 - Turn off the column switching on the index tables
 - Change are/is for if there is 1 duplicate in the warning
 - Fix alignment inside match form and make form title larger

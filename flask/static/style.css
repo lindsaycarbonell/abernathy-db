@@ -68,3 +68,9 @@ th:hover{
   font-weight:bold;
   color:red;
 }
+
+/*datatables mods*/
+div.dataTables_wrapper div.dataTables_filter{
+  display:inline;
+  margin-left:126px;
+}
