@@ -1,6 +1,8 @@
 ## Flask Merger
 This application is solely for facilitating the merge between Editor & Publisher's database and our original database. The application is built in Flask with the connecting database in SQLite.
 
+<img src="innerpg.jpg" />
+
 ### Installation
 - Start the virtual environment
   - `. venv_flask/bin/activate`
