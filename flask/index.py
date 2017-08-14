@@ -267,18 +267,18 @@ def attempt_merge(state):
     state_str = [this_state][0].strip("[u'").strip("''")
 
     query_db('DROP VIEW IF EXISTS merge_attempt')
-    # query_db('DROP VIEW IF EXISTS ep_%s' % (state_str))
+    # query_db('DROP VIEW IF EXISTS eptbl_%s' % (state_str))
 
-    query_db('''CREATE VIEW IF NOT EXISTS ep_%s AS
+    query_db('''CREATE VIEW IF NOT EXISTS eptbl_%s AS
     SELECT * FROM ep_2017
     WHERE Streetaddressstate = "%s"
     ''' % (state_str, state_str))
 
-    # print query_db('SELECT * FROM ep_%s' % (state_str))
+    # print query_db('SELECT * FROM eptbl_%s' % (state_str))
 
     query_db('''CREATE VIEW IF NOT EXISTS merge_attempt AS SELECT t2.ep_id AS ep_id, t1.newspaper_id AS db_id, t1.newspaper_name AS newspaper_name, t1.city AS city
     FROM newspaper_2017 AS t1
-    INNER JOIN ep_%s AS t2
+    INNER JOIN eptbl_%s AS t2
     ON ( t1.newspaper_name = t2.pub_companyName
     OR "The " || trim(replace(t1.newspaper_name,'The','')) = t2.pub_companyName
     OR REPLACE(t1.newspaper_name,'-',' ') = REPLACE(t2.pub_companyName,'-',' ')
@@ -297,9 +297,9 @@ def show_merge(state):
 
     query_db('DROP VIEW IF EXISTS final_merge')
 
-    # query_db('DROP VIEW IF EXISTS ep_%s' % (state_str))
+    # query_db('DROP VIEW IF EXISTS eptbl_%s' % (state_str))
 
-    query_db('''CREATE VIEW IF NOT EXISTS ep_%s AS
+    query_db('''CREATE VIEW IF NOT EXISTS eptbl_%s AS
     SELECT * FROM ep_2017
     WHERE Streetaddressstate = "%s"
     ''' % (state_str, state_str))
@@ -311,7 +311,7 @@ def show_merge(state):
     AuditBy AS ep_audit_by, AuditDate AS ep_audit_date, ParentCompany AS ep_owner,
     t2.pub_companyName AS ep_newspaper_name,
     t1.city AS city, t1.county AS county FROM newspaper_2017 AS t1
-    LEFT OUTER JOIN ep_%s AS t2 ON
+    LEFT OUTER JOIN eptbl_%s AS t2 ON
     ( t1.newspaper_name = t2.pub_companyName
     OR "The " || trim(replace(t1.newspaper_name,'The','')) = t2.pub_companyName
     OR  REPLACE(t1.newspaper_name,"-"," ") = REPLACE(t2.pub_companyName,"-"," ")
